@@ -1,5 +1,6 @@
 
 'use strict';
+const GAME_BUILD='7.3';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -50,7 +51,7 @@ function getQuizBank(type){
  return Array.isArray(banks[type])?banks[type]:[];
 }
 
-function openSlimeQuiz(type){
+function openSlimeQuiz(type, expectedSlimeName=''){
  if(!quizUI.overlay)return;
  const bank=getQuizBank(type);
  if(!bank.length){
@@ -58,7 +59,13 @@ function openSlimeQuiz(type){
   return;
  }
 
- currentQuiz=bank[Math.floor(Math.random()*bank.length)];
+ // 처치한 슬라임의 전용 문제은행만 사용한다.
+ const matchedBank=expectedSlimeName
+  ? bank.filter(q=>q.slimeName===expectedSlimeName)
+  : bank;
+ const sourceBank=matchedBank.length?matchedBank:bank;
+ currentQuiz=sourceBank[Math.floor(Math.random()*sourceBank.length)];
+ currentQuiz={...currentQuiz, slimeName:expectedSlimeName||currentQuiz.slimeName, quizType:type};
  quizActive=true;
  quizAnswered=false;
 
@@ -180,13 +187,13 @@ function reset(){
  rec=0;en=40;life=3;done=0;cam=0;missiles=[];purifiers=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
  const slimeTypes=[
-  {label:'유혹 슬라임',quizType:'bribery'},
-  {label:'연줄 슬라임',quizType:'connection'},
-  {label:'정보보안 슬라임',quizType:'security'},
-  {label:'공정 슬라임',quizType:'fairness'},
-  {label:'갑질 슬라임',quizType:'abuse'}
+  {id:'temptation',label:'유혹 슬라임',quizType:'bribery'},
+  {id:'connection',label:'연줄 슬라임',quizType:'connection'},
+  {id:'security',label:'정보보안 슬라임',quizType:'security'},
+  {id:'fairness',label:'공정 슬라임',quizType:'fairness'},
+  {id:'abuse',label:'갑질 슬라임',quizType:'abuse'}
  ];
- foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,...slimeTypes[i]}));
+ foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,slimeIndex:i,...slimeTypes[i]}));
  boss={x:3650,y:PLATFORM_SURFACE_Y-330,w:390,h:330,hp:24,max:24,active:0,alive:1,lastHit:-1,phase:'wait',intro:0,attackTimer:3.6,countdown:0,flash:0,shotNo:0,charging:0};
 }
 
@@ -357,7 +364,7 @@ function startBossEncounter(){
 const CAPSULE_TYPES=[
  {label:'부정청탁',icon:'!',liquid:'#9a46cf',glow:'#e6a8ff'},
  {label:'금품수수',icon:'₩',liquid:'#b77832',glow:'#ffd28a'},
- {label:'특혜제공',icon:'★',liquid:'#b83e59',glow:'#ff9aaa'}
+ {label:'불공정',icon:'★',liquid:'#b83e59',glow:'#ff9aaa'}
 ];
 function fireBossMissiles(){
  boss.shotNo++;
@@ -441,7 +448,7 @@ function game(dt){
     f.alive=0;
     rec+=12;
     en+=10;
-    openSlimeQuiz(f.quizType);
+    openSlimeQuiz(f.quizType,f.label);
    }}
   if(hit(body,fb)&&pl.inv<=0){
     if(pl.sh>0){f.dir*=-1;f.x+=pl.dir*24}else{life--;pl.inv=1.0;pl.vy=-260;if(life<=0)S='gameover'}
