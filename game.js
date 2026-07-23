@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.2-bundled';
+window.GAME_BUILD_VERSION='8.4-cleanup';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='7.3';
+const GAME_BUILD='8.4';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -552,7 +552,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const 
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 let S='loading',T=0,last=0,cam=0,rec=0,en=0,life=3,done=0;
-let pl,foes,boss,missiles=[],purifiers=[],bursts=[],hitSparks=[],toxicBits=[];
+let pl,foes,boss,missiles=[],bursts=[],hitSparks=[],toxicBits=[];
 
 let quizActive=false,currentQuiz=null,quizAnswered=false;
 
@@ -708,7 +708,7 @@ function reset(){
   quizUI.overlay.classList.remove('active');
   quizUI.overlay.setAttribute('aria-hidden','true');
  }
- rec=0;en=40;life=3;done=0;cam=0;missiles=[];purifiers=[];bursts=[];hitSparks=[];toxicBits=[];
+ rec=0;en=40;life=3;done=0;cam=0;missiles=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
  const slimeTypes=[
   {id:'temptation',label:'유혹 슬라임',quizType:'bribery'},
@@ -923,11 +923,6 @@ function drawCapsule(m){
  txt(t.icon,-9,6,16,'#fff');ctx.restore();
  txt(t.label,m.x+m.w/2,m.y+m.h+19,13,'#ffe8f2');
 }
-function firePurifier(){
- if(!boss.active||!boss.alive||boss.phase==='intro'||en<30)return;
- en-=30;
- purifiers.push({x:pl.x+pl.dir*42,y:pl.y+42,w:70,h:28,vx:pl.dir*680,alive:1});
-}
 function addBurst(x,y,big=false){bursts.push({x,y,t:big?.55:.32,max:big?.55:.32,big});}
 function addHitSpark(x,y,big=false){
  const count=big?10:6;
@@ -955,7 +950,6 @@ function game(dt){
  pl.atkCd=Math.max(0,pl.atkCd-dt);pl.shCd=Math.max(0,pl.shCd-dt);
  if((P['z']||P['k'])&&pl.atk<=0&&pl.atkCd<=0&&!guarding){pl.atk=.28;pl.atkCd=.31;pl.atkSeq++}
  if((P['x']||P['l'])&&pl.sh<=0&&pl.shCd<=0&&pl.atk<=0){pl.sh=.55;pl.shCd=.95}
- if(P['c']||P['j'])firePurifier()
  pl.atk=Math.max(0,pl.atk-dt);pl.sh=Math.max(0,pl.sh-dt);pl.inv=Math.max(0,pl.inv-dt);
  pl.vy+=1200*dt;pl.x=cl(pl.x+pl.vx*dt,40,WORLD-80);pl.y+=pl.vy*dt;
  if(pl.y+pl.h>=G){pl.y=G-pl.h;pl.vy=0;pl.on=1}else pl.on=0;
@@ -1004,16 +998,6 @@ function game(dt){
   if(boss.phase==='fight'&&hit(body,bb)&&pl.inv<=0&&pl.sh<=0){life--;pl.inv=1;pl.vx=-pl.dir*300;if(life<=0)S='gameover'}
  }
 
- purifiers.forEach(m=>{
-  if(!m.alive)return;m.x+=m.vx*dt;
-  const mb={x:m.x,y:m.y,w:m.w,h:m.h};
-  if(boss.active&&boss.alive&&boss.phase==='fight'){
-   const bb={x:boss.x-boss.w/2,y:boss.y,w:boss.w,h:boss.h};
-   if(hit(mb,bb)){m.alive=0;boss.hp=Math.max(0,boss.hp-4);rec+=5;addBurst(m.x,m.y,true);if(boss.hp<=0){boss.alive=0;rec=100;S='clear'}}
-  }
-  if(m.x<cam-100||m.x>cam+W+200)m.alive=0;
- });
- purifiers=purifiers.filter(m=>m.alive);
  missiles.forEach(m=>{
   if(!m.alive)return;m.trail.push({x:m.x,y:m.y});if(m.trail.length>11)m.trail.shift();m.x+=m.vx*dt;m.y+=m.vy*dt;m.rot+=m.spin*dt;
   if(pl.atk>.05&&hit(atkBox,m)){m.alive=0;addToxicBreak(m.x+m.w/2,m.y+m.h/2,m.type,false);return}
@@ -1031,7 +1015,7 @@ function game(dt){
 function title(){
  drawCover(A.title,0,0,W,H);
  ctx.fillStyle='rgba(0,20,42,.72)';ctx.fillRect(0,H-42,W,42);
- txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v7.2',1238,30,15,'#d7efff','right');
+ txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v8.4',1238,30,15,'#d7efff','right');
 }
 function intro(){
  bg(Math.min(30,T*4));ground();
@@ -1079,7 +1063,6 @@ function drawGame(){
   drawCapsule(m);
  });
  toxicBits.forEach(q=>{const a=Math.max(0,q.t/q.max);ctx.globalAlpha=a;if(q.kind==='glass'){ctx.strokeStyle='#e8f7ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q.x-4,q.y-2);ctx.lineTo(q.x+4,q.y+2);ctx.stroke()}else{ctx.fillStyle=q.color;ctx.beginPath();ctx.arc(q.x,q.y,q.r*(.5+a),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1});
- purifiers.forEach(m=>{rr(m.x,m.y,m.w,m.h,14,'#34d7ff','#fff');txt('정화',m.x+m.w/2,m.y+21,14,'#062744')});
  bursts.forEach(b=>{
   const p=1-b.t/b.max,r=(b.big?115:58)*p;
   ctx.globalAlpha=1-p;ctx.strokeStyle=b.big?'#9ffcff':'#ffe671';ctx.lineWidth=b.big?12:7;ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
@@ -1105,7 +1088,7 @@ function drawGame(){
  txt('도시 회복도  '+Math.round(rec)+'%',700,39,18);
  rr(500,58,400,24,12,'#071b2d','#a7d8ef');
  ctx.fillStyle='#50dba2';ctx.fillRect(504,62,392*rec/100,16);
- txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'이동 A/D · 점프 SPACE · 공격 Z · 방패 X · 정화미사일 C(30)',1035,40,15,'#d9f7ff');
+ txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'이동 A/D · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
 
  if(boss.active&&boss.alive){
   rr(370,105,540,54,18,'rgba(35,5,28,.9)','#ff87ac');

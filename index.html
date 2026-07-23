@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#061426">
-<title>청렴 에너지 히어로 — Full Quiz v7.0</title>
+<title>청렴 에너지 히어로 — Full Quiz v8.4</title>
 
 <style>
 *{
@@ -59,6 +59,8 @@ canvas{
   display:block;
   width:100%;
   height:100%;
+  max-width:100%;
+  max-height:100%;
   background:#07192b;
   touch-action:none;
 }
@@ -198,15 +200,34 @@ canvas{
   }
 }
 
-/* PC에서는 기존처럼 화면만 표시 */
+/* PC: 브라우저의 가로·세로 크기를 모두 기준으로 16:9 화면을 맞춘다.
+   화면 높이가 낮은 노트북에서도 위·아래가 잘리지 않는다. */
 @media (pointer:fine) and (min-width:901px){
+  html,body{
+    width:100%;
+    height:100%;
+    min-height:100%;
+    overflow:hidden;
+  }
+
   body{
-    min-height:100vh;
+    min-height:100dvh;
     align-items:center;
+    padding:12px;
   }
 
   #app{
-    width:min(100vw,1280px);
+    width:min(
+      1280px,
+      calc(100vw - 24px),
+      calc((100dvh - 24px) * 16 / 9)
+    );
+    max-height:calc(100dvh - 24px);
+  }
+
+  #game-wrap{
+    width:100%;
+    max-height:calc(100dvh - 24px);
   }
 }
 
@@ -229,7 +250,7 @@ canvas{
 @media (max-width:430px){#quiz-overlay{padding:12px}#quiz-card{padding:18px 15px;border-radius:16px}#quiz-title{font-size:21px}#quiz-question{font-size:15px}.quiz-choice{font-size:14px}}
 
 </style>
-<!-- Integrity Energy Hero build 8.1 -->
+<!-- Integrity Energy Hero build 8.4 -->
 </head>
 
 <body>
@@ -279,8 +300,8 @@ canvas{
     </div>
   </nav>
 </main>
-<script src="game.js?v=8.2-bundled"></script>
+<script src="game.js?v=8.4-cleanup"></script>
 
-<div id="build-version" style="position:fixed;right:8px;bottom:8px;z-index:9999;padding:4px 7px;border-radius:6px;background:rgba(0,0,0,.62);color:#bdeeff;font:700 11px/1.2 system-ui">v8.2 · 보기 3개</div>
+<div id="build-version" style="position:fixed;right:8px;bottom:8px;z-index:9999;padding:4px 7px;border-radius:6px;background:rgba(0,0,0,.62);color:#bdeeff;font:700 11px/1.2 system-ui">v8.4 · 보기 3개</div>
 </body>
 </html>
