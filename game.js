@@ -68,7 +68,7 @@ function openSlimeQuiz(type){
  }
 
  quizUI.quote.textContent='“'+currentQuiz.slimeQuote+'”';
- quizUI.title.textContent=currentQuiz.title;
+ quizUI.title.textContent=(currentQuiz.slimeName?currentQuiz.slimeName+' · ':'')+currentQuiz.title;
  quizUI.question.textContent=currentQuiz.question;
  quizUI.choices.innerHTML='';
  quizUI.result.classList.remove('active');
@@ -500,7 +500,7 @@ function game(dt){
 function title(){
  drawCover(A.title,0,0,W,H);
  ctx.fillStyle='rgba(0,20,42,.72)';ctx.fillRect(0,H-42,W,42);
- txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v7.0',1238,30,15,'#d7efff','right');
+ txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v7.2',1238,30,15,'#d7efff','right');
 }
 function intro(){
  bg(Math.min(30,T*4));ground();
@@ -523,14 +523,18 @@ function drawGame(){
   const sw=f.w*1.18, sh=(f.h+12)*1.18;
   // 슬라임 원본의 빈 배경 여백을 제거하고 실제 몸체 바닥을 캐릭터 발 높이에 고정한다.
   drawCropped(A.slime,.14,.20,.73,.60,f.x-sw/2,CHARACTER_FOOT_Y-sh,sw,sh,1,f.dir<0);
-  // 이미 월드 좌표계를 -cam만큼 이동했으므로 카메라 값을 다시 빼지 않는다.
-  txt(f.label,f.x,f.y-26,15,'#ffe46b');
+  // 슬라임 종류가 확실히 보이도록 머리 위에 이름표를 표시한다.
+  const badgeW=Math.max(118, f.label.length*18+30);
+  rr(f.x-badgeW/2, CHARACTER_FOOT_Y-sh-42, badgeW, 30, 15, 'rgba(4,26,48,.90)', '#ffe46b');
+  txt(f.label,f.x,CHARACTER_FOOT_Y-sh-20,16,'#ffe46b');
  }});
  if(boss.alive&&boss.active){
   ctx.save();
   if(boss.flash>0){ctx.globalAlpha=.65+.35*Math.sin(performance.now()/35)}
   drawContain(A.boss,boss.x-boss.w/2,boss.y,boss.w,boss.h,1,false,0,.5,1);
   ctx.restore();
+  rr(boss.x-90,boss.y-42,180,32,16,'rgba(40,4,55,.92)','#ffb3ff');
+  txt('부패마왕',boss.x,boss.y-19,18,'#ffb3ff');
   if(boss.phase==='fight'&&boss.charging>0){
    const pulse=22+boss.charging*24+Math.sin(performance.now()/45)*4;
    ctx.save();ctx.globalAlpha=.45+.45*boss.charging;ctx.shadowColor='#d95cff';ctx.shadowBlur=25;
