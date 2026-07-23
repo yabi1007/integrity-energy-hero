@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='9.2-final-result-button';
+window.GAME_BUILD_VERSION='9.3-final-result-hard-lock';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='9.2';
+const GAME_BUILD='9.3';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -533,6 +533,12 @@ const K={},P={};
 const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0||matchMedia('(pointer:coarse)').matches;
 const mobilePointers=new Map();
 function setVirtualKey(key,down,oneShot=false){
+ // 결과 화면에서는 모바일 공격/방패 버튼 입력도 전부 무시한다.
+ if(S==='clear'){
+  K[key]=0;
+  delete P[key];
+  return;
+ }
  if(down){if(oneShot||!K[key])P[key]=1;K[key]=1}else K[key]=0;
 }
 function bindTouchButton(id,key,{oneShot=false}={}){
@@ -702,7 +708,21 @@ Promise.all(Object.entries(paths).map(([k,p])=>new Promise((res,rej)=>{
 
 onkeydown=e=>{
  const k=e.key.toLowerCase();
- if(!K[k])P[k]=1; K[k]=1;
+
+ // 최종 청렴도 화면에서는 모든 게임 진행 키를 입력 단계부터 완전히 차단한다.
+ // 공격키를 누른 채 보스를 처치해도 결과 화면이 넘어가지 않는다.
+ if(S==='clear'){
+  if(['z','k','enter',' ','x','l','arrowup','w'].includes(k)){
+   e.preventDefault();
+   e.stopPropagation();
+  }
+  K[k]=0;
+  delete P[k];
+  return false;
+ }
+
+ if(!K[k])P[k]=1;
+ K[k]=1;
  if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
 };
 onkeyup=e=>K[e.key.toLowerCase()]=0;
@@ -964,7 +984,13 @@ function update(dt){
  else if(S==='intro'){if(T>7.5||P['enter']||P[' ']||P['z'])scene('game')}
  else if(S==='game')game(dt);
  else if((S==='gameover'||S==='end')&&(P['enter']||P[' ']||P['z']))scene('title');
- // clear 화면에서는 Z·Enter·Space 입력을 모두 무시한다.
+
+ if(S==='clear'){
+  for(const k in K)K[k]=0;
+  for(const k in P)delete P[k];
+  return;
+ }
+
  for(const k in P)delete P[k];
 }
 function game(dt){
@@ -1041,8 +1067,11 @@ function game(dt){
     S='clear';
     T=0;
     setResultOverlay(true);
-    // 공격 직후 남아 있는 Z 입력이 결과 화면에 영향을 주지 않도록 제거
-    for(const k of ['z','k','enter',' ']){K[k]=0;delete P[k]}
+    // 공격 직후 남아 있는 모든 입력을 통째로 제거한다.
+    for(const k in K)K[k]=0;
+    for(const k in P)delete P[k];
+    document.querySelectorAll('.touch-btn').forEach(b=>b.classList.remove('pressed'));
+    mobilePointers.clear();
    }
   }
   if(boss.phase==='fight'&&hit(body,bb)&&pl.inv<=0&&pl.sh<=0){life--;pl.inv=1;pl.vx=-pl.dir*300;if(life<=0)S='gameover'}
