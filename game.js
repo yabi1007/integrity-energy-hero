@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.6-city-cleanup';
+window.GAME_BUILD_VERSION='8.7-cleanup-fix';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='8.6';
+const GAME_BUILD='8.7';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -1080,15 +1080,12 @@ function drawGame(){
   const attack=pl.atk>0?1-pl.atk/.28:0;
   playerRig(pl.x-cam,pl.y+pl.h,0.88,attack,pl.sh>0,pl.dir<0);
  }
-
- const remainingSlimes=foes.filter(f=>f.alive).length;
- rr(22,20,420,94,20,'rgba(3,20,38,.82)','rgba(150,220,255,.65)');
+ rr(22,20,310,94,20,'rgba(3,20,38,.82)','rgba(150,220,255,.65)');
  txt('♥'.repeat(Math.max(0,life)),45,54,28,'#ff7188','left');
- txt('남은 슬라임  '+remainingSlimes,45,88,18,'#d9f7ff','left');
- txt('🌱 도시 정화율  '+Math.round(rec)+'%',700,39,18);
- rr(500,58,400,24,12,'#071b2d','#a7d8ef');
+ txt('🌱 도시 정화율  '+Math.round(rec)+'%',45,88,18,'#d9f7ff','left');
+ rr(360,58,540,24,12,'#071b2d','#a7d8ef');
  ctx.fillStyle=rec<25?'#ff596d':rec<50?'#ff9f43':rec<75?'#ffd84d':'#50dba2';
- ctx.fillRect(504,62,392*rec/100,16);
+ ctx.fillRect(364,62,532*rec/100,16);
  txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'이동 A/D · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
 
  if(boss.active&&boss.alive){
