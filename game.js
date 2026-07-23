@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.5-score-fix';
+window.GAME_BUILD_VERSION='8.6-city-cleanup';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='8.5';
+const GAME_BUILD='8.6';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -551,7 +551,7 @@ addEventListener('blur',()=>{for(const k of ['arrowleft','arrowright','z','x'])K
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k of ['arrowleft','arrowright','z','x'])K[k]=0}});
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
-let S='loading',T=0,last=0,cam=0,rec=0,en=0,life=3,done=0;
+let S='loading',T=0,last=0,cam=0,rec=0,life=3,done=0;
 let pl,foes,boss,missiles=[],bursts=[],hitSparks=[],toxicBits=[];
 
 let quizActive=false,currentQuiz=null,quizAnswered=false;
@@ -629,7 +629,7 @@ function answerSlimeQuiz(selectedIndex){
  quizAnswered=true;
 
  const correct=selectedIndex===currentQuiz.answer;
- if(correct) en=Math.min(100,en+15);
+ if(correct) rec=Math.min(100,rec+15);
  quizUI.resultTitle.textContent=correct?currentQuiz.correctText:currentQuiz.wrongText;
  quizUI.resultExplain.textContent=currentQuiz.explain;
  quizUI.result.classList.add('active');
@@ -709,7 +709,7 @@ function reset(){
   quizUI.overlay.classList.remove('active');
   quizUI.overlay.setAttribute('aria-hidden','true');
  }
- rec=0;en=0;life=3;done=0;cam=0;missiles=[];bursts=[];hitSparks=[];toxicBits=[];
+ rec=0;life=3;done=0;cam=0;missiles=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
  const slimeTypes=[
   {id:'temptation',label:'유혹 슬라임',quizType:'bribery'},
@@ -965,7 +965,6 @@ function game(dt){
   const fb={x:f.x-f.w/2,y:f.y,w:f.w,h:f.h};
   if(pl.atk>.05&&hit(atkBox,fb)&&f.lastHit!==pl.atkSeq){f.lastHit=pl.atkSeq;f.hp--;addHitSpark(pl.dir>0?f.x-f.w*.22:f.x+f.w*.22,f.y+f.h*.48,false);if(f.hp<=0){
     f.alive=0;
-    rec+=12;
     openSlimeQuiz(f.quizType,f.label);
    }}
   if(hit(body,fb)&&pl.inv<=0){
@@ -993,7 +992,7 @@ function game(dt){
   const bb={x:boss.x-boss.w/2,y:boss.y,w:boss.w,h:boss.h};
   if(boss.phase==='fight'&&pl.atk>.05&&hit(atkBox,bb)&&boss.lastHit!==pl.atkSeq){
    boss.lastHit=pl.atkSeq;boss.hp--;addHitSpark(pl.dir>0?boss.x-boss.w*.32:boss.x+boss.w*.32,boss.y+boss.h*.52,true);
-   if(boss.hp<=0){boss.alive=0;rec=100;en=Math.min(100,en+25);addBurst(boss.x,boss.y+100,true);S='clear'}
+   if(boss.hp<=0){boss.alive=0;rec=Math.min(100,rec+25);addBurst(boss.x,boss.y+100,true);S='clear'}
   }
   if(boss.phase==='fight'&&hit(body,bb)&&pl.inv<=0&&pl.sh<=0){life--;pl.inv=1;pl.vx=-pl.dir*300;if(life<=0)S='gameover'}
  }
@@ -1015,7 +1014,7 @@ function game(dt){
 function title(){
  drawCover(A.title,0,0,W,H);
  ctx.fillStyle='rgba(0,20,42,.72)';ctx.fillRect(0,H-42,W,42);
- txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v8.5',1238,30,15,'#d7efff','right');
+ txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v8.6',1238,30,15,'#d7efff','right');
 }
 function intro(){
  bg(Math.min(30,T*4));ground();
@@ -1082,12 +1081,14 @@ function drawGame(){
   playerRig(pl.x-cam,pl.y+pl.h,0.88,attack,pl.sh>0,pl.dir<0);
  }
 
- rr(22,20,405,94,20,'rgba(3,20,38,.82)','rgba(150,220,255,.65)');
+ const remainingSlimes=foes.filter(f=>f.alive).length;
+ rr(22,20,420,94,20,'rgba(3,20,38,.82)','rgba(150,220,255,.65)');
  txt('♥'.repeat(Math.max(0,life)),45,54,28,'#ff7188','left');
- txt('청렴 에너지  '+en,45,88,18,'#d9f7ff','left');
- txt('도시 회복도  '+Math.round(rec)+'%',700,39,18);
+ txt('남은 슬라임  '+remainingSlimes,45,88,18,'#d9f7ff','left');
+ txt('🌱 도시 정화율  '+Math.round(rec)+'%',700,39,18);
  rr(500,58,400,24,12,'#071b2d','#a7d8ef');
- ctx.fillStyle='#50dba2';ctx.fillRect(504,62,392*rec/100,16);
+ ctx.fillStyle=rec<25?'#ff596d':rec<50?'#ff9f43':rec<75?'#ffd84d':'#50dba2';
+ ctx.fillRect(504,62,392*rec/100,16);
  txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'이동 A/D · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
 
  if(boss.active&&boss.alive){
@@ -1121,7 +1122,7 @@ function render(){
  if(S==='title')title();
  else if(S==='intro')intro();
  else if(S==='game'){drawGame();if(pl.inv>0&&Math.floor(pl.inv*10)%2===0){ctx.fillStyle='rgba(255,50,80,.12)';ctx.fillRect(0,0,W,H)}}
- else if(S==='clear'){bg(100);ground();playerRig(350,540,1.05,0,1,false);panel('STAGE 1 CLEAR!','도시에 청렴의 빛이 돌아왔습니다.')}
+ else if(S==='clear'){bg(rec);ground();playerRig(350,540,1.05,0,1,false);panel(rec>=100?'도시 정화 완료!':'STAGE 1 CLEAR!','최종 도시 정화율 '+Math.round(rec)+'%')}
  else if(S==='gameover'){bg(rec);ground();panel('정화 실패','다시 도전해 부패를 몰아내세요.')}
  else if(S==='end'){bg(100);panel('청렴 에너지 히어로','청렴은 대한민국을 밝히는 힘입니다.')}
 }
