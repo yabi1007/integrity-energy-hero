@@ -662,7 +662,7 @@ if(quizUI.overlay)quizUI.overlay.addEventListener('click',e=>e.stopPropagation()
 
 
 const paths={
- title:'assets/title-screen2.png',
+ title:'assets/title-screen.png',
  sky:'assets/stage/sky.png', cloud:'assets/stage/cloud.png',
  mountain:'assets/stage/mountain.png', building:'assets/stage/building.png',
  platform:'assets/stage/platform.png', turbine:'assets/stage/wind_turbine.png',
