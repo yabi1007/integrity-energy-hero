@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='9.7-safari-chrome-notice';
+window.GAME_BUILD_VERSION='10.0-result-screen';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -567,7 +567,7 @@ window.QUIZ_BANKS.abuse = [
  confirmBtn.addEventListener('click',closeNotice,{once:true});
 })();
 
-const GAME_BUILD='9.7';
+const GAME_BUILD='10.0';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -619,6 +619,7 @@ const quizUI={
  choices:document.getElementById('quiz-choices'),
  result:document.getElementById('quiz-result'),
  resultTitle:document.getElementById('quiz-result-title'),
+ resultAnswer:document.getElementById('quiz-result-answer'),
  resultExplain:document.getElementById('quiz-result-explain'),
  continueBtn:document.getElementById('quiz-continue')
 };
@@ -655,9 +656,12 @@ function openSlimeQuiz(type, expectedSlimeName=''){
  quizUI.title.textContent=(currentQuiz.slimeName?currentQuiz.slimeName+' · ':'')+currentQuiz.title;
  quizUI.question.textContent=currentQuiz.question;
  quizUI.choices.innerHTML='';
+ const quizCard=document.getElementById('quiz-card');
+ if(quizCard)quizCard.classList.remove('answered');
  quizUI.result.classList.remove('active');
  quizUI.continueBtn.classList.remove('active');
  quizUI.resultTitle.textContent='';
+ if(quizUI.resultAnswer)quizUI.resultAnswer.textContent='';
  quizUI.resultExplain.textContent='';
 
  const choiceLabels=['①','②','③','④'];
@@ -680,7 +684,6 @@ function openSlimeQuiz(type, expectedSlimeName=''){
  document.body.classList.add('quiz-open');
  // 매번 새 문제는 카드 맨 위에서 시작한다.
  quizUI.overlay.scrollTop=0;
- const quizCard=document.getElementById('quiz-card');
  if(quizCard)quizCard.scrollTop=0;
 }
 
@@ -689,28 +692,31 @@ function answerSlimeQuiz(selectedIndex){
  quizAnswered=true;
 
  const correct=selectedIndex===currentQuiz.answer;
- if(correct) rec=Math.min(100,rec+15);
- quizUI.resultTitle.textContent=correct?currentQuiz.correctText:currentQuiz.wrongText;
+ if(correct)rec=Math.min(100,rec+15);
+
+ const choiceLabels=['①','②','③','④'];
+ const correctIndex=currentQuiz.answer;
+ const correctChoice=Array.isArray(currentQuiz.choices)
+  ? currentQuiz.choices[correctIndex]
+  : '';
+
+ // 결과 화면에서는 문제와 보기를 숨기고 정답·해설만 표시한다.
+ quizUI.resultTitle.textContent=correct?'✅ 정답입니다!':'❌ 아쉽습니다!';
+ if(quizUI.resultAnswer){
+  quizUI.resultAnswer.textContent=
+   '정답 '+(choiceLabels[correctIndex]||String(correctIndex+1)+'.')+
+   (correctChoice?' '+correctChoice:'');
+ }
  quizUI.resultExplain.textContent=currentQuiz.explain;
+
+ const quizCard=document.getElementById('quiz-card');
+ if(quizCard){
+  quizCard.classList.add('answered');
+  quizCard.scrollTop=0;
+ }
+
  quizUI.result.classList.add('active');
  quizUI.continueBtn.classList.add('active');
-
- // v9.6: 모바일의 낮은 가로 화면에서도 정답 설명과 계속하기 버튼이 바로 보이게 한다.
- requestAnimationFrame(()=>{
-  const quizCard=document.getElementById('quiz-card');
-  if(quizCard){
-   quizCard.scrollTo({
-    top:quizCard.scrollHeight,
-    behavior:'smooth'
-   });
-  }
- });
-
- [...quizUI.choices.children].forEach((button,index)=>{
-  button.disabled=true;
-  if(index===currentQuiz.answer)button.style.outline='3px solid #66efb3';
-  else if(index===selectedIndex&&!correct)button.style.outline='3px solid #ff7589';
- });
 }
 
 function closeSlimeQuiz(){
@@ -721,6 +727,8 @@ function closeSlimeQuiz(){
  quizUI.overlay.classList.remove('active');
  quizUI.overlay.setAttribute('aria-hidden','true');
  document.body.classList.remove('quiz-open');
+ const quizCard=document.getElementById('quiz-card');
+ if(quizCard)quizCard.classList.remove('answered');
  quizUI.choices.innerHTML='';
 }
 
@@ -823,6 +831,8 @@ function reset(){
   quizUI.overlay.classList.remove('active');
   quizUI.overlay.setAttribute('aria-hidden','true');
  }
+ const quizCard=document.getElementById('quiz-card');
+ if(quizCard)quizCard.classList.remove('answered');
  document.body.classList.remove('quiz-open');
  rec=0;life=3;done=0;cam=0;missiles=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
