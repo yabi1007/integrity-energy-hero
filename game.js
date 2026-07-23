@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.8-cleanup-final';
+window.GAME_BUILD_VERSION='8.9-boss-delay-1.5s';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='8.8';
+const GAME_BUILD='8.9';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -719,7 +719,7 @@ function reset(){
   {id:'abuse',label:'갑질 슬라임',quizType:'abuse'}
  ];
  foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,slimeIndex:i,...slimeTypes[i]}));
- boss={x:3650,y:PLATFORM_SURFACE_Y-330,w:390,h:330,hp:24,max:24,active:0,alive:1,lastHit:-1,phase:'wait',intro:0,attackTimer:3.6,countdown:0,flash:0,shotNo:0,charging:0};
+ boss={x:3650,y:PLATFORM_SURFACE_Y-330,w:390,h:330,hp:24,max:24,active:0,alive:1,lastHit:-1,phase:'wait',intro:0,attackTimer:3.6,postShotDelay:0,countdown:0,flash:0,shotNo:0,charging:0};
 }
 
 function drawCover(img,x,y,w,h,alpha=1){
@@ -978,13 +978,29 @@ function game(dt){
    boss.intro+=dt;pl.vx=0;
    const target=cam+W-225;
    boss.x+=(target-boss.x)*Math.min(1,dt*2.6);
-   if(boss.intro>=1.55){boss.phase='fight';boss.attackTimer=3.0;boss.countdown=0;boss.charging=0}
+   if(boss.intro>=1.55){boss.phase='fight';boss.attackTimer=3.0;boss.postShotDelay=0;boss.countdown=0;boss.charging=0}
   }else if(boss.phase==='fight'){
    boss.flash=Math.max(0,boss.flash-dt);
-   boss.attackTimer-=dt;
-   boss.charging=boss.attackTimer<=.38&&boss.attackTimer>0?1-boss.attackTimer/.38:0;
-   boss.countdown=boss.attackTimer<=3?Math.max(1,Math.ceil(boss.attackTimer)):0;
-   if(boss.attackTimer<=0){fireBossMissiles();boss.attackTimer=5.0;boss.countdown=0}
+
+   // 발사 직후 1.5초간 휴식한 뒤 다시 3→2→1 카운트다운
+   if(boss.postShotDelay>0){
+    boss.postShotDelay=Math.max(0,boss.postShotDelay-dt);
+    boss.countdown=0;
+    boss.charging=0;
+    if(boss.postShotDelay<=0)boss.attackTimer=3.0;
+   }else{
+    boss.attackTimer-=dt;
+    boss.charging=boss.attackTimer<=.38&&boss.attackTimer>0?1-boss.attackTimer/.38:0;
+    boss.countdown=boss.attackTimer>0?Math.max(1,Math.ceil(boss.attackTimer)):0;
+
+    if(boss.attackTimer<=0){
+     fireBossMissiles();
+     boss.postShotDelay=1.5;
+     boss.attackTimer=0;
+     boss.countdown=0;
+     boss.charging=0;
+    }
+   }
    const desired=pl.x+500;
    boss.x+=(desired-boss.x)*Math.min(1,dt*(boss.hp<=boss.max/2?1.2:.75));
    boss.x=cl(boss.x,3200,WORLD-130);
