@@ -4,7 +4,7 @@
 // questions_bribery.js
 // ============================================
 
-const BRIBERY_QUESTIONS = [
+window.BRIBERY_QUESTIONS = [
 {
 id:1,
 slimeQuote:"커피 한 잔 정도는 괜찮잖아?",
@@ -63,5 +63,5 @@ explain:"직무 관련성이 있다면 업무 종료 후에도 금품 수수는 
 ];
 
 function getRandomBriberyQuestion(){
-return BRIBERY_QUESTIONS[Math.floor(Math.random()*BRIBERY_QUESTIONS.length)];
+return window.BRIBERY_QUESTIONS[Math.floor(Math.random()*window.BRIBERY_QUESTIONS.length)];
 }
