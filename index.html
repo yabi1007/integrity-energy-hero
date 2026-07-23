@@ -209,6 +209,25 @@ canvas{
     width:min(100vw,1280px);
   }
 }
+
+/* 유혹 슬라임 청렴 퀴즈 */
+#quiz-overlay{position:absolute;inset:0;z-index:15;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,10,20,.82);backdrop-filter:blur(4px)}
+#quiz-overlay.active{display:flex}
+#quiz-card{width:min(92%,620px);max-height:92%;overflow:auto;padding:24px;border:1px solid rgba(147,226,255,.42);border-radius:20px;background:linear-gradient(180deg,rgba(13,38,61,.98),rgba(6,23,39,.98));box-shadow:0 16px 50px #000b;color:#fff;text-align:center}
+#quiz-slime-quote{margin:0 0 10px;color:#ffd978;font-size:16px;font-weight:700}
+#quiz-title{margin:0 0 14px;font-size:26px}
+#quiz-question{margin:0 0 18px;color:#e7f6ff;font-size:17px;line-height:1.55}
+#quiz-choices{display:grid;gap:10px}
+.quiz-choice{width:100%;min-height:48px;padding:12px 14px;border:1px solid rgba(182,231,255,.35);border-radius:12px;background:rgba(18,59,88,.88);color:#fff;font-size:15px;font-weight:700;line-height:1.4;cursor:pointer}
+.quiz-choice:active{transform:scale(.98)}
+#quiz-result{display:none;margin-top:18px;padding:14px;border-radius:12px;background:rgba(0,0,0,.24)}
+#quiz-result.active{display:block}
+#quiz-result-title{margin:0 0 8px;font-size:19px}
+#quiz-result-explain{margin:0;color:#d7ebf5;font-size:14px;line-height:1.55}
+#quiz-continue{display:none;width:100%;min-height:48px;margin-top:14px;border:0;border-radius:12px;background:#ffd34f;color:#172235;font-size:16px;font-weight:800;cursor:pointer}
+#quiz-continue.active{display:block}
+@media (max-width:430px){#quiz-overlay{padding:12px}#quiz-card{padding:18px 15px;border-radius:16px}#quiz-title{font-size:21px}#quiz-question{font-size:15px}.quiz-choice{font-size:14px}}
+
 </style>
 </head>
 
@@ -218,6 +237,21 @@ canvas{
 <main id="app">
   <div id="game-wrap">
     <canvas id="c" width="1280" height="720" aria-label="청렴 에너지 히어로 게임"></canvas>
+
+    <section id="quiz-overlay" aria-hidden="true">
+      <div id="quiz-card" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
+        <p id="quiz-slime-quote"></p>
+        <h2 id="quiz-title">청렴 선택</h2>
+        <p id="quiz-question"></p>
+        <div id="quiz-choices"></div>
+        <div id="quiz-result">
+          <h3 id="quiz-result-title"></h3>
+          <p id="quiz-result-explain"></p>
+        </div>
+        <button id="quiz-continue" type="button">계속하기</button>
+      </div>
+    </section>
+
   </div>
 
   <nav id="mobile-controls" aria-label="모바일 조작 버튼">
@@ -245,6 +279,7 @@ canvas{
   </nav>
 </main>
 
+<script src="questions_bribery.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
