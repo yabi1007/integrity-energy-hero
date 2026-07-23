@@ -31,6 +31,99 @@ document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 let S='loading',T=0,last=0,cam=0,rec=0,en=0,life=3,done=0;
 let pl,foes,boss,missiles=[],purifiers=[],bursts=[],hitSparks=[],toxicBits=[];
 
+let quizActive=false,currentQuiz=null,quizAnswered=false;
+
+const quizUI={
+ overlay:document.getElementById('quiz-overlay'),
+ quote:document.getElementById('quiz-slime-quote'),
+ title:document.getElementById('quiz-title'),
+ question:document.getElementById('quiz-question'),
+ choices:document.getElementById('quiz-choices'),
+ result:document.getElementById('quiz-result'),
+ resultTitle:document.getElementById('quiz-result-title'),
+ resultExplain:document.getElementById('quiz-result-explain'),
+ continueBtn:document.getElementById('quiz-continue')
+};
+
+function openBriberyQuiz(questionIndex=0){
+ if(!quizUI.overlay||typeof BRIBERY_QUESTIONS==='undefined')return;
+
+ currentQuiz=BRIBERY_QUESTIONS[questionIndex]||getRandomBriberyQuestion();
+ quizActive=true;
+ quizAnswered=false;
+
+ for(const k of ['arrowleft','arrowright','a','d','z','k','x','l',' ','arrowup','w']){
+  K[k]=0;
+  delete P[k];
+ }
+
+ quizUI.quote.textContent='“'+currentQuiz.slimeQuote+'”';
+ quizUI.title.textContent=currentQuiz.title;
+ quizUI.question.textContent=currentQuiz.question;
+ quizUI.choices.innerHTML='';
+ quizUI.result.classList.remove('active');
+ quizUI.continueBtn.classList.remove('active');
+ quizUI.resultTitle.textContent='';
+ quizUI.resultExplain.textContent='';
+
+ currentQuiz.choices.forEach((choice,index)=>{
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='quiz-choice';
+  button.textContent=choice;
+  button.addEventListener('click',e=>{
+   e.preventDefault();
+   e.stopPropagation();
+   answerBriberyQuiz(index);
+  });
+  quizUI.choices.appendChild(button);
+ });
+
+ quizUI.overlay.classList.add('active');
+ quizUI.overlay.setAttribute('aria-hidden','false');
+}
+
+function answerBriberyQuiz(selectedIndex){
+ if(!quizActive||quizAnswered||!currentQuiz)return;
+ quizAnswered=true;
+
+ const correct=selectedIndex===currentQuiz.answer;
+ quizUI.resultTitle.textContent=correct
+  ? currentQuiz.correctText
+  : currentQuiz.wrongText;
+ quizUI.resultExplain.textContent=currentQuiz.explain;
+ quizUI.result.classList.add('active');
+ quizUI.continueBtn.classList.add('active');
+
+ [...quizUI.choices.children].forEach((button,index)=>{
+  button.disabled=true;
+  if(index===currentQuiz.answer)button.style.outline='3px solid #66efb3';
+  else if(index===selectedIndex&&!correct)button.style.outline='3px solid #ff7589';
+ });
+}
+
+function closeBriberyQuiz(){
+ if(!quizActive||!quizAnswered)return;
+ quizActive=false;
+ currentQuiz=null;
+ quizAnswered=false;
+ quizUI.overlay.classList.remove('active');
+ quizUI.overlay.setAttribute('aria-hidden','true');
+ quizUI.choices.innerHTML='';
+}
+
+if(quizUI.continueBtn){
+ quizUI.continueBtn.addEventListener('click',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  closeBriberyQuiz();
+ });
+}
+if(quizUI.overlay){
+ quizUI.overlay.addEventListener('click',e=>e.stopPropagation());
+}
+
+
 const paths={
  title:'assets/title-screen.png',
  sky:'assets/stage/sky.png', cloud:'assets/stage/cloud.png',
@@ -73,6 +166,11 @@ function rr(x,y,w,h,r,fill,stroke){
 }
 function scene(s){S=s;T=0;if(s==='game')reset()}
 function reset(){
+ quizActive=false;currentQuiz=null;quizAnswered=false;
+ if(quizUI.overlay){
+  quizUI.overlay.classList.remove('active');
+  quizUI.overlay.setAttribute('aria-hidden','true');
+ }
  rec=0;en=40;life=3;done=0;cam=0;missiles=[];purifiers=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
  foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,label:['특혜','갑질','청탁','사적이익','이해충돌'][i]}));
@@ -304,6 +402,7 @@ function update(dt){
  for(const k in P)delete P[k];
 }
 function game(dt){
+ if(quizActive)return;
  let d=(K['arrowleft']||K['a']?-1:0)+(K['arrowright']||K['d']?1:0);
  const guarding=pl.sh>0;
  const speed=guarding?130:(pl.atk>0?180:270);
@@ -325,7 +424,12 @@ function game(dt){
   f.x+=f.dir*40*dt;
   if(Math.abs(f.x-[620,1080,1540,2200,2780][foes.indexOf(f)])>90)f.dir*=-1;
   const fb={x:f.x-f.w/2,y:f.y,w:f.w,h:f.h};
-  if(pl.atk>.05&&hit(atkBox,fb)&&f.lastHit!==pl.atkSeq){f.lastHit=pl.atkSeq;f.hp--;addHitSpark(pl.dir>0?f.x-f.w*.22:f.x+f.w*.22,f.y+f.h*.48,false);if(f.hp<=0){f.alive=0;rec+=12;en+=10}}
+  if(pl.atk>.05&&hit(atkBox,fb)&&f.lastHit!==pl.atkSeq){f.lastHit=pl.atkSeq;f.hp--;addHitSpark(pl.dir>0?f.x-f.w*.22:f.x+f.w*.22,f.y+f.h*.48,false);if(f.hp<=0){
+    f.alive=0;
+    rec+=12;
+    en+=10;
+    openBriberyQuiz(foes.indexOf(f));
+   }}
   if(hit(body,fb)&&pl.inv<=0){
     if(pl.sh>0){f.dir*=-1;f.x+=pl.dir*24}else{life--;pl.inv=1.0;pl.vy=-260;if(life<=0)S='gameover'}
   }
