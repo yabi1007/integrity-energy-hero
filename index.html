@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>청렴 에너지 히어로 — Mobile Demo v5.5</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;background:#061426;font-family:Arial,"Malgun Gothic",sans-serif;overflow:hidden;overscroll-behavior:none;touch-action:none;user-select:none;-webkit-user-select:none}
+body{display:grid;place-items:center;padding:0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#game-wrap{position:relative;width:min(100vw,1280px);aspect-ratio:16/9;max-height:100vh;display:grid;place-items:center}
+canvas{display:block;width:100%;height:100%;background:#07192b;box-shadow:0 0 40px #0008;cursor:pointer;touch-action:none}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#061426;color:white;font-size:20px;z-index:20}
+#mobile-controls{position:absolute;inset:0;pointer-events:none;z-index:10;display:none}
+.control-group{position:absolute;bottom:max(18px,env(safe-area-inset-bottom));display:flex;gap:14px;pointer-events:auto}
+.control-group.move{left:max(18px,env(safe-area-inset-left))}
+.control-group.action{right:max(18px,env(safe-area-inset-right))}
+.touch-btn{width:clamp(62px,10vw,88px);height:clamp(62px,10vw,88px);border-radius:50%;border:2px solid rgba(210,244,255,.72);background:rgba(3,24,45,.62);box-shadow:0 4px 14px #0008,inset 0 0 18px rgba(117,220,255,.14);color:#fff;font:700 clamp(24px,4vw,35px)/1 Arial,"Malgun Gothic",sans-serif;display:grid;place-items:center;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);touch-action:none}
+.touch-btn.action-btn{border-color:rgba(255,230,138,.82);background:rgba(46,25,16,.65)}
+.touch-btn.shield-btn{border-color:rgba(151,233,255,.9);background:rgba(10,49,74,.68)}
+.touch-btn.pressed,.touch-btn:active{transform:scale(.92);filter:brightness(1.28);box-shadow:0 2px 7px #0008,inset 0 0 24px rgba(255,255,255,.28)}
+#rotate-hint{display:none;position:fixed;inset:0;z-index:30;background:#061426;color:#fff;place-items:center;text-align:center;padding:30px;font-size:20px;line-height:1.6}
+@media (pointer:coarse),(max-width:900px){#mobile-controls{display:block}}
+@media (orientation:portrait) and (max-width:900px){
+ body{align-items:center}
+ #game-wrap{width:100vw;height:auto;max-height:none}
+ .touch-btn{width:68px;height:68px}
+}
+@media (max-height:430px){
+ .control-group{bottom:10px}.touch-btn{width:58px;height:58px;font-size:25px}.control-group{gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="loading">에셋 불러오는 중…</div>
+<div id="game-wrap">
+<canvas id="c" width="1280" height="720" aria-label="청렴 에너지 히어로 게임"></canvas>
+<div id="mobile-controls" aria-label="모바일 조작 버튼">
+  <div class="control-group move">
+    <button class="touch-btn" id="btn-left" aria-label="왼쪽 이동">◀</button>
+    <button class="touch-btn" id="btn-right" aria-label="오른쪽 이동">▶</button>
+  </div>
+  <div class="control-group action">
+    <button class="touch-btn action-btn" id="btn-attack" aria-label="청렴의 검 공격">⚔</button>
+    <button class="touch-btn shield-btn" id="btn-shield" aria-label="이해충돌 방패">🛡</button>
+  </div>
+</div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
