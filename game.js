@@ -984,7 +984,7 @@ function game(dt){
    boss.attackTimer-=dt;
    boss.charging=boss.attackTimer<=.38&&boss.attackTimer>0?1-boss.attackTimer/.38:0;
    boss.countdown=boss.attackTimer<=3?Math.max(1,Math.ceil(boss.attackTimer)):0;
-   if(boss.attackTimer<=0){fireBossMissiles();boss.attackTimer=boss.hp<=boss.max/2?2.8:3.8;boss.countdown=0}
+   if(boss.attackTimer<=0){fireBossMissiles();boss.attackTimer=5.0;boss.countdown=0}
    const desired=pl.x+500;
    boss.x+=(desired-boss.x)*Math.min(1,dt*(boss.hp<=boss.max/2?1.2:.75));
    boss.x=cl(boss.x,3200,WORLD-130);
