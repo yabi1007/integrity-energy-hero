@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='9.4-final-polish';
+window.GAME_BUILD_VERSION='9.5-platform-grounding';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='9.4';
+const GAME_BUILD='9.5';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -839,7 +839,8 @@ function bg(recovery=0){
 function ground(){
  const PLATFORM_LIFT=34;
  ctx.save();ctx.translate(-cam,0);
- for(let x=0;x<WORLD;x+=492)drawCover(A.platform,x,G-PLATFORM_LIFT,510,125);
+ // v9.5: 플랫폼 조각 사이의 빈틈이 보이지 않도록 서로 살짝 겹쳐 연결한다.
+ for(let x=-12;x<WORLD+24;x+=468)drawCover(A.platform,x,G-PLATFORM_LIFT,515,125);
  ctx.fillStyle='#09121d';ctx.fillRect(0,G+118-PLATFORM_LIFT,WORLD,184);
  // v5.0.3: 발전시설의 하단을 플랫폼 실제 윗면 기준선에 정확히 고정한다.
  const props=[
@@ -856,7 +857,9 @@ function ground(){
      ? {sx:.12,sy:.24,sw:.80,sh:.58}
      : {sx:.21,sy:.04,sw:.59,sh:.82};
    const drawH=p.h;
-   const y=CHARACTER_FOOT_Y-drawH;
+   // v9.5: 발전시설이 떠 보이지 않도록 시각적 바닥 기준을 8px 아래로 내린다.
+   const PROP_GROUND_OFFSET=8;
+   const y=CHARACTER_FOOT_Y-drawH+PROP_GROUND_OFFSET;
    drawCropped(p.img,crop.sx,crop.sy,crop.sw,crop.sh,p.x,y,p.w,drawH,.92,p.flip);
  });
  ctx.restore();
