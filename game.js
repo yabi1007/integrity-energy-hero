@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='9.3-final-result-hard-lock';
+window.GAME_BUILD_VERSION='9.4-final-polish';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='9.3';
+const GAME_BUILD='9.4';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -1166,7 +1166,7 @@ function drawGame(){
  rr(360,58,540,24,12,'#071b2d','#a7d8ef');
  ctx.fillStyle=rec<25?'#ff596d':rec<50?'#ff9f43':rec<75?'#ffd84d':'#50dba2';
  ctx.fillRect(364,62,532*rec/100,16);
- txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'이동 A/D · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
+ txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'← → 이동 · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
 
  if(boss.active&&boss.alive){
   rr(370,105,540,54,18,'rgba(35,5,28,.9)','#ff87ac');
@@ -1204,7 +1204,7 @@ function render(){
  else if(S==='game'){drawGame();if(pl.inv>0&&Math.floor(pl.inv*10)%2===0){ctx.fillStyle='rgba(255,50,80,.12)';ctx.fillRect(0,0,W,H)}}
  else if(S==='clear'){
   bg(rec);ground();playerRig(350,540,1.05,0,1,false);
-  panel(rec>=100?'청렴도 회복 완료!!':'STAGE 1 CLEAR!','최종 청렴도 '+Math.round(rec)+'%',false);
+  panel(rec>=100?'청렴도 회복 완료!!':'🏆 CLEAR!','최종 청렴도 '+Math.round(rec)+'%',false);
  }
  else if(S==='gameover'){bg(rec);ground();panel('정화 실패','다시 도전해 부패를 몰아내세요.')}
  else if(S==='end'){bg(100);panel('청렴 에너지 히어로','청렴은 대한민국을 밝히는 힘입니다.')}
