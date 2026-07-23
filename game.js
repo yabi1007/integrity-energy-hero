@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='10.0-result-screen';
+window.GAME_BUILD_VERSION='10.1-no-jump';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -567,7 +567,7 @@ window.QUIZ_BANKS.abuse = [
  confirmBtn.addEventListener('click',closeNotice,{once:true});
 })();
 
-const GAME_BUILD='10.0';
+const GAME_BUILD='10.1';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -647,7 +647,7 @@ function openSlimeQuiz(type, expectedSlimeName=''){
  quizActive=true;
  quizAnswered=false;
 
- for(const k of ['arrowleft','arrowright','a','d','z','k','x','l',' ','arrowup','w']){
+ for(const k of ['arrowleft','arrowright','a','d','z','k','x','l']){
   K[k]=0;
   delete P[k];
  }
@@ -789,7 +789,7 @@ onkeydown=e=>{
  // 최종 청렴도 화면에서는 모든 게임 진행 키를 입력 단계부터 완전히 차단한다.
  // 공격키를 누른 채 보스를 처치해도 결과 화면이 넘어가지 않는다.
  if(S==='clear'){
-  if(['z','k','enter',' ','x','l','arrowup','w'].includes(k)){
+  if(['z','k','enter',' ','x','l'].includes(k)){
    e.preventDefault();
    e.stopPropagation();
   }
@@ -800,7 +800,7 @@ onkeydown=e=>{
 
  if(!K[k])P[k]=1;
  K[k]=1;
- if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
+ if([' ','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();
 };
 onkeyup=e=>K[e.key.toLowerCase()]=0;
 c.addEventListener('click',()=>{
@@ -1082,7 +1082,6 @@ function game(dt){
  const guarding=pl.sh>0;
  const speed=guarding?130:(pl.atk>0?180:270);
  pl.vx+=(d*speed-pl.vx)*Math.min(1,dt*12);if(d)pl.dir=d;
- if((P[' ']||P['arrowup']||P['w'])&&pl.on){pl.vy=-550;pl.on=0}
  pl.atkCd=Math.max(0,pl.atkCd-dt);pl.shCd=Math.max(0,pl.shCd-dt);
  if((P['z']||P['k'])&&pl.atk<=0&&pl.atkCd<=0&&!guarding){pl.atk=.28;pl.atkCd=.31;pl.atkSeq++}
  if((P['x']||P['l'])&&pl.sh<=0&&pl.shCd<=0&&pl.atk<=0){pl.sh=.55;pl.shCd=.95}
@@ -1249,7 +1248,7 @@ function drawGame(){
  rr(360,58,540,24,12,'#071b2d','#a7d8ef');
  ctx.fillStyle=rec<25?'#ff596d':rec<50?'#ff9f43':rec<75?'#ffd84d':'#50dba2';
  ctx.fillRect(364,62,532*rec/100,16);
- txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'← → 이동 · 점프 SPACE · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
+ txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'← → 이동 · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
 
  if(boss.active&&boss.alive){
   rr(370,105,540,54,18,'rgba(35,5,28,.9)','#ff87ac');
