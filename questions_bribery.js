@@ -1,0 +1,67 @@
+// ============================================
+// 청렴 에너지 히어로
+// Stage 1 : 유혹 슬라임
+// questions_bribery.js
+// ============================================
+
+const BRIBERY_QUESTIONS = [
+{
+id:1,
+slimeQuote:"커피 한 잔 정도는 괜찮잖아?",
+title:"커피 한 잔의 유혹",
+question:"업체 담당자가 계약 상담 후 감사의 의미라며 5만원 상당의 커피 쿠폰을 보내왔습니다.",
+choices:["감사의 의미니까 받는다.","정중히 거절하거나 반환한다."],
+answer:1,
+correctText:"청렴의 힘이 유혹을 이겨냈습니다!",
+wrongText:"작은 선물이 큰 부패의 시작이 될 수 있습니다.",
+explain:"직무 관련자로부터 금품이나 향응을 받는 것은 원칙적으로 금지됩니다."
+},
+{
+id:2,
+slimeQuote:"점심 한 끼인데 뭐 어때?",
+title:"식사의 유혹",
+question:"민원인이 식사를 대접하겠다며 함께 식사하자고 합니다.",
+choices:["거절하거나 각자 계산한다.","식사 정도는 괜찮으니 얻어먹는다."],
+answer:0,
+correctText:"청렴의 힘이 유혹을 이겨냈습니다!",
+wrongText:"호의가 반복되면 이해관계가 생길 수 있습니다.",
+explain:"직무 관련자와의 식사 제공은 상황에 따라 청탁금지법 문제가 될 수 있습니다."
+},
+{
+id:3,
+slimeQuote:"기념품인데 받아도 되잖아?",
+title:"기념품의 유혹",
+question:"협력업체가 행사 후 고가의 기념품을 전달했습니다.",
+choices:["기관 규정에 따라 반납한다.","기념품이니까 개인이 가진다."],
+answer:0,
+correctText:"청렴은 작은 선택에서 시작됩니다!",
+wrongText:"공짜는 없습니다.",
+explain:"고가의 기념품 역시 직무 관련성이 있다면 받을 수 없습니다."
+},
+{
+id:4,
+slimeQuote:"퇴근길인데 태워주는 건 괜찮잖아?",
+title:"편의 제공의 유혹",
+question:"계약업체 직원이 집까지 데려다주겠다고 합니다.",
+choices:["정중히 거절한다.","교통비도 아끼고 좋으니 이용한다."],
+answer:0,
+correctText:"청렴 에너지 +20",
+wrongText:"사소한 편의도 이해관계가 될 수 있습니다.",
+explain:"교통편 제공 역시 직무 관련 편의 제공에 해당할 수 있습니다."
+},
+{
+id:5,
+slimeQuote:"응원하는 마음이야. 기프티콘 받아!",
+title:"기프티콘의 유혹",
+question:"업무를 마친 뒤 민원인이 감사하다며 기프티콘을 보냈습니다.",
+choices:["감사 인사만 하고 반환한다.","업무가 끝났으니 받아도 된다."],
+answer:0,
+correctText:"청렴의 빛이 도시를 지켰습니다!",
+wrongText:"직무가 끝났더라도 이해관계는 남을 수 있습니다.",
+explain:"직무 관련성이 있다면 업무 종료 후에도 금품 수수는 문제가 될 수 있습니다."
+}
+];
+
+function getRandomBriberyQuestion(){
+return BRIBERY_QUESTIONS[Math.floor(Math.random()*BRIBERY_QUESTIONS.length)];
+}
