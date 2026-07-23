@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.7-cleanup-fix';
+window.GAME_BUILD_VERSION='8.8-cleanup-final';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='8.7';
+const GAME_BUILD='8.8';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
