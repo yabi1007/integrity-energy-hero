@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='9.5-platform-grounding';
+window.GAME_BUILD_VERSION='9.7-safari-chrome-notice';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,52 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='9.5';
+
+// v9.7: Safari에서만 Chrome 권장 안내를 한 번 표시한다.
+// iOS의 모든 브라우저는 WebKit 기반이지만, Chrome/Firefox/Edge 앱은 제외한다.
+(function setupSafariBrowserNotice(){
+ const ua=navigator.userAgent||'';
+ const vendor=navigator.vendor||'';
+ const isAppleWebKit=/AppleWebKit/i.test(ua);
+ const isSafariToken=/Safari/i.test(ua);
+ const isExcluded=/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo/i.test(ua);
+ const isSafari=isAppleWebKit&&isSafariToken&&!isExcluded&&/Apple/i.test(vendor);
+
+ if(!isSafari)return;
+
+ const notice=document.getElementById('browser-notice');
+ const confirmBtn=document.getElementById('browser-notice-confirm');
+ if(!notice||!confirmBtn)return;
+
+ let alreadySeen=false;
+ try{
+  alreadySeen=sessionStorage.getItem('integrityHeroSafariNoticeSeen')==='1';
+ }catch(_){}
+
+ if(alreadySeen)return;
+
+ const closeNotice=e=>{
+  if(e){
+   e.preventDefault();
+   e.stopPropagation();
+  }
+  notice.classList.remove('active');
+  notice.setAttribute('aria-hidden','true');
+  document.body.classList.remove('browser-notice-open');
+  try{
+   sessionStorage.setItem('integrityHeroSafariNoticeSeen','1');
+  }catch(_){}
+ };
+
+ notice.classList.add('active');
+ notice.setAttribute('aria-hidden','false');
+ document.body.classList.add('browser-notice-open');
+
+ confirmBtn.addEventListener('pointerup',closeNotice,{passive:false,once:true});
+ confirmBtn.addEventListener('click',closeNotice,{once:true});
+})();
+
+const GAME_BUILD='9.7';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -555,7 +600,11 @@ bindTouchButton('btn-attack','z',{oneShot:true});
 bindTouchButton('btn-shield','x',{oneShot:true});
 addEventListener('blur',()=>{for(const k of ['arrowleft','arrowright','z','x'])K[k]=0;document.querySelectorAll('.touch-btn').forEach(b=>b.classList.remove('pressed'));mobilePointers.clear()});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){for(const k of ['arrowleft','arrowright','z','x'])K[k]=0}});
-document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+// v9.6: 게임 화면의 브라우저 스크롤은 막되, 모바일 퀴즈 카드 내부 스크롤은 허용한다.
+document.addEventListener('touchmove',e=>{
+ const insideQuizCard=e.target instanceof Element && e.target.closest('#quiz-card');
+ if(!insideQuizCard)e.preventDefault();
+},{passive:false});
 
 let S='loading',T=0,last=0,cam=0,rec=0,life=3,done=0;
 let pl,foes,boss,missiles=[],bursts=[],hitSparks=[],toxicBits=[];
@@ -628,6 +677,11 @@ function openSlimeQuiz(type, expectedSlimeName=''){
 
  quizUI.overlay.classList.add('active');
  quizUI.overlay.setAttribute('aria-hidden','false');
+ document.body.classList.add('quiz-open');
+ // 매번 새 문제는 카드 맨 위에서 시작한다.
+ quizUI.overlay.scrollTop=0;
+ const quizCard=document.getElementById('quiz-card');
+ if(quizCard)quizCard.scrollTop=0;
 }
 
 function answerSlimeQuiz(selectedIndex){
@@ -640,6 +694,17 @@ function answerSlimeQuiz(selectedIndex){
  quizUI.resultExplain.textContent=currentQuiz.explain;
  quizUI.result.classList.add('active');
  quizUI.continueBtn.classList.add('active');
+
+ // v9.6: 모바일의 낮은 가로 화면에서도 정답 설명과 계속하기 버튼이 바로 보이게 한다.
+ requestAnimationFrame(()=>{
+  const quizCard=document.getElementById('quiz-card');
+  if(quizCard){
+   quizCard.scrollTo({
+    top:quizCard.scrollHeight,
+    behavior:'smooth'
+   });
+  }
+ });
 
  [...quizUI.choices.children].forEach((button,index)=>{
   button.disabled=true;
@@ -655,15 +720,19 @@ function closeSlimeQuiz(){
  quizAnswered=false;
  quizUI.overlay.classList.remove('active');
  quizUI.overlay.setAttribute('aria-hidden','true');
+ document.body.classList.remove('quiz-open');
  quizUI.choices.innerHTML='';
 }
 
 if(quizUI.continueBtn){
- quizUI.continueBtn.addEventListener('click',e=>{
+ const continueQuiz=e=>{
   e.preventDefault();
   e.stopPropagation();
   closeSlimeQuiz();
- });
+ };
+ // v9.6: 일부 모바일 브라우저에서 click이 누락되는 경우를 막기 위해 pointerup도 함께 처리한다.
+ quizUI.continueBtn.addEventListener('pointerup',continueQuiz,{passive:false});
+ quizUI.continueBtn.addEventListener('click',continueQuiz);
 }
 if(quizUI.overlay)quizUI.overlay.addEventListener('click',e=>e.stopPropagation());
 
@@ -754,6 +823,7 @@ function reset(){
   quizUI.overlay.classList.remove('active');
   quizUI.overlay.setAttribute('aria-hidden','true');
  }
+ document.body.classList.remove('quiz-open');
  rec=0;life=3;done=0;cam=0;missiles=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
  const slimeTypes=[
