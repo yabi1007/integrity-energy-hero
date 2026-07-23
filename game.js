@@ -1119,7 +1119,7 @@ function render(){
  if(S==='title')title();
  else if(S==='intro')intro();
  else if(S==='game'){drawGame();if(pl.inv>0&&Math.floor(pl.inv*10)%2===0){ctx.fillStyle='rgba(255,50,80,.12)';ctx.fillRect(0,0,W,H)}}
- else if(S==='clear'){bg(rec);ground();playerRig(350,540,1.05,0,1,false);panel(rec>=100?'도시 정화 완료!':'STAGE 1 CLEAR!','최종 청렴도 '+Math.round(rec)+'%')}
+ else if(S==='clear'){bg(rec);ground();playerRig(350,540,1.05,0,1,false);panel(rec>=100?'청렴도 회복 완료!!':'STAGE 1 CLEAR!','최종 청렴도 '+Math.round(rec)+'%')}
  else if(S==='gameover'){bg(rec);ground();panel('정화 실패','다시 도전해 부패를 몰아내세요.')}
  else if(S==='end'){bg(100);panel('청렴 에너지 히어로','청렴은 대한민국을 밝히는 힘입니다.')}
 }
