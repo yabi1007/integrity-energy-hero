@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='8.9-boss-delay-1.5s';
+window.GAME_BUILD_VERSION='9.2-final-result-button';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -522,7 +522,7 @@ window.QUIZ_BANKS.abuse = [
 
 
 'use strict';
-const GAME_BUILD='8.9';
+const GAME_BUILD='9.2';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -661,6 +661,25 @@ if(quizUI.continueBtn){
 }
 if(quizUI.overlay)quizUI.overlay.addEventListener('click',e=>e.stopPropagation());
 
+const resultUI={
+ overlay:document.getElementById('result-actions'),
+ restartBtn:document.getElementById('result-restart')
+};
+
+function setResultOverlay(show){
+ if(!resultUI.overlay)return;
+ resultUI.overlay.classList.toggle('active',show);
+ resultUI.overlay.setAttribute('aria-hidden',show?'false':'true');
+}
+
+if(resultUI.restartBtn){
+ resultUI.restartBtn.addEventListener('click',e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(S==='clear')scene('title');
+ });
+}
+
 
 const paths={
  title:'assets/title-screen.png',
@@ -689,7 +708,8 @@ onkeydown=e=>{
 onkeyup=e=>K[e.key.toLowerCase()]=0;
 c.addEventListener('click',()=>{
  if(S==='title') scene('intro');
- else if(S==='clear'||S==='gameover'||S==='end') scene('title');
+ else if(S==='gameover'||S==='end') scene('title');
+ // clear 화면은 인증샷 보존을 위해 캔버스 클릭으로 넘어가지 않는다.
 });
 
 function cl(v,a,b){return Math.max(a,Math.min(b,v))}
@@ -702,8 +722,13 @@ function rr(x,y,w,h,r,fill,stroke){
  ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill();
  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}
 }
-function scene(s){S=s;T=0;if(s==='game')reset()}
+function scene(s){
+ S=s;T=0;
+ setResultOverlay(s==='clear');
+ if(s==='game')reset();
+}
 function reset(){
+ setResultOverlay(false);
  quizActive=false;currentQuiz=null;quizAnswered=false;
  if(quizUI.overlay){
   quizUI.overlay.classList.remove('active');
@@ -938,7 +963,8 @@ function update(dt){
  if(S==='title'){if(P['enter']||P[' ']||P['z'])scene('intro')}
  else if(S==='intro'){if(T>7.5||P['enter']||P[' ']||P['z'])scene('game')}
  else if(S==='game')game(dt);
- else if((S==='clear'||S==='gameover'||S==='end')&&(P['enter']||P[' ']||P['z']))scene('title');
+ else if((S==='gameover'||S==='end')&&(P['enter']||P[' ']||P['z']))scene('title');
+ // clear 화면에서는 Z·Enter·Space 입력을 모두 무시한다.
  for(const k in P)delete P[k];
 }
 function game(dt){
@@ -1008,7 +1034,16 @@ function game(dt){
   const bb={x:boss.x-boss.w/2,y:boss.y,w:boss.w,h:boss.h};
   if(boss.phase==='fight'&&pl.atk>.05&&hit(atkBox,bb)&&boss.lastHit!==pl.atkSeq){
    boss.lastHit=pl.atkSeq;boss.hp--;addHitSpark(pl.dir>0?boss.x-boss.w*.32:boss.x+boss.w*.32,boss.y+boss.h*.52,true);
-   if(boss.hp<=0){boss.alive=0;rec=Math.min(100,rec+25);addBurst(boss.x,boss.y+100,true);S='clear'}
+   if(boss.hp<=0){
+    boss.alive=0;
+    rec=Math.min(100,rec+25);
+    addBurst(boss.x,boss.y+100,true);
+    S='clear';
+    T=0;
+    setResultOverlay(true);
+    // 공격 직후 남아 있는 Z 입력이 결과 화면에 영향을 주지 않도록 제거
+    for(const k of ['z','k','enter',' ']){K[k]=0;delete P[k]}
+   }
   }
   if(boss.phase==='fight'&&hit(body,bb)&&pl.inv<=0&&pl.sh<=0){life--;pl.inv=1;pl.vx=-pl.dir*300;if(life<=0)S='gameover'}
  }
@@ -1123,11 +1158,14 @@ function drawGame(){
   }
  }
 }
-function panel(title,sub){
+function panel(title,sub,showContinueHint=true){
  ctx.fillStyle='rgba(2,10,22,.78)';ctx.fillRect(0,0,W,H);
  txt(title,W/2,300,62,title.includes('CLEAR')?'#8dffcb':'#fff');
  txt(sub,W/2,370,26,'#d7efff');
- rr(W/2-150,430,300,65,18,'#187bc2','#8ee8ff');txt(IS_TOUCH?'화면 터치 또는 ⚔':'클릭 또는 ENTER',W/2,471,21);
+ if(showContinueHint){
+  rr(W/2-150,430,300,65,18,'#187bc2','#8ee8ff');
+  txt(IS_TOUCH?'화면 터치 또는 ⚔':'클릭 또는 ENTER',W/2,471,21);
+ }
 }
 function render(){
  ctx.clearRect(0,0,W,H);
@@ -1135,7 +1173,10 @@ function render(){
  if(S==='title')title();
  else if(S==='intro')intro();
  else if(S==='game'){drawGame();if(pl.inv>0&&Math.floor(pl.inv*10)%2===0){ctx.fillStyle='rgba(255,50,80,.12)';ctx.fillRect(0,0,W,H)}}
- else if(S==='clear'){bg(rec);ground();playerRig(350,540,1.05,0,1,false);panel(rec>=100?'청렴도 회복 완료!!':'STAGE 1 CLEAR!','최종 청렴도 '+Math.round(rec)+'%')}
+ else if(S==='clear'){
+  bg(rec);ground();playerRig(350,540,1.05,0,1,false);
+  panel(rec>=100?'청렴도 회복 완료!!':'STAGE 1 CLEAR!','최종 청렴도 '+Math.round(rec)+'%',false);
+ }
  else if(S==='gameover'){bg(rec);ground();panel('정화 실패','다시 도전해 부패를 몰아내세요.')}
  else if(S==='end'){bg(100);panel('청렴 에너지 히어로','청렴은 대한민국을 밝히는 힘입니다.')}
 }
