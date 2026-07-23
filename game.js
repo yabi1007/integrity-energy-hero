@@ -83,11 +83,13 @@ function openSlimeQuiz(type, expectedSlimeName=''){
  quizUI.resultTitle.textContent='';
  quizUI.resultExplain.textContent='';
 
- currentQuiz.choices.forEach((choice,index)=>{
+ const choiceLabels=['①','②','③','④'];
+ const visibleChoices=Array.isArray(currentQuiz.choices)?currentQuiz.choices.slice(0,4):[];
+ visibleChoices.forEach((choice,index)=>{
   const button=document.createElement('button');
   button.type='button';
   button.className='quiz-choice';
-  button.textContent=choice;
+  button.textContent=(choiceLabels[index]||String(index+1)+'.')+' '+choice;
   button.addEventListener('click',e=>{
    e.preventDefault();
    e.stopPropagation();
