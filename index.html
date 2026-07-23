@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#061426">
-<title>청렴 에너지 히어로 — Mobile Demo v6.0</title>
+<title>청렴 에너지 히어로 — Mobile Demo v6.2</title>
 
 <style>
 *{
@@ -15,33 +15,44 @@
 html,body{
   margin:0;
   width:100%;
-  height:100%;
+  min-height:100%;
   background:#061426;
   font-family:Arial,"Malgun Gothic",sans-serif;
-  overflow:hidden;
   overscroll-behavior:none;
-  touch-action:none;
   user-select:none;
   -webkit-user-select:none;
 }
 
 body{
-  display:grid;
-  place-items:center;
+  min-height:100dvh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  overflow-x:hidden;
   padding:
-    env(safe-area-inset-top)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+    max(8px,env(safe-area-inset-top))
+    max(8px,env(safe-area-inset-right))
+    max(8px,env(safe-area-inset-bottom))
+    max(8px,env(safe-area-inset-left));
+}
+
+/* 세로 화면: 게임 화면과 조작부를 완전히 분리 */
+#app{
+  width:min(100%,1280px);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:10px;
 }
 
 #game-wrap{
   position:relative;
-  width:min(100vw,1280px);
+  width:100%;
   aspect-ratio:16/9;
-  max-height:100vh;
-  display:grid;
-  place-items:center;
+  overflow:hidden;
+  background:#07192b;
+  border-radius:12px;
+  box-shadow:0 8px 30px #0008;
 }
 
 canvas{
@@ -49,8 +60,6 @@ canvas{
   width:100%;
   height:100%;
   background:#07192b;
-  box-shadow:0 0 40px #0008;
-  cursor:pointer;
   touch-action:none;
 }
 
@@ -65,211 +74,139 @@ canvas{
   z-index:20;
 }
 
-/* 모바일 조작 버튼 */
+/* 게임 화면 아래 전용 조작 영역 */
 #mobile-controls{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:10;
   display:none;
+  width:100%;
+  min-height:76px;
+  padding:8px 10px max(8px,env(safe-area-inset-bottom));
+  border:1px solid rgba(151,220,255,.16);
+  border-radius:16px;
+  background:rgba(3,20,38,.82);
+  box-shadow:0 8px 24px #0005;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  touch-action:none;
 }
 
 .control-group{
-  position:absolute;
-  bottom:max(7px,env(safe-area-inset-bottom));
   display:flex;
-  gap:7px;
-  pointer-events:auto;
+  align-items:center;
+  gap:10px;
 }
 
 .control-group.move{
-  left:max(7px,env(safe-area-inset-left));
+  justify-content:flex-start;
 }
 
 .control-group.action{
-  right:max(7px,env(safe-area-inset-right));
+  justify-content:flex-end;
 }
 
 .touch-btn{
-  width:clamp(42px,7vw,54px);
-  height:clamp(42px,7vw,54px);
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
   border-radius:50%;
-  border:1.5px solid rgba(210,244,255,.55);
-  background:rgba(3,24,45,.32);
+  border:1.5px solid rgba(210,244,255,.56);
+  background:rgba(9,37,61,.82);
   box-shadow:
-    0 3px 10px #0006,
-    inset 0 0 12px rgba(117,220,255,.10);
-  color:rgba(255,255,255,.86);
-  font:700 clamp(18px,3vw,25px)/1 Arial,"Malgun Gothic",sans-serif;
+    0 4px 10px #0006,
+    inset 0 0 12px rgba(117,220,255,.11);
+  color:rgba(255,255,255,.92);
+  font:700 23px/1 Arial,"Malgun Gothic",sans-serif;
   display:grid;
   place-items:center;
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
   touch-action:none;
-  opacity:.72;
 }
 
 .touch-btn.action-btn{
   border-color:rgba(255,230,138,.68);
-  background:rgba(46,25,16,.36);
+  background:rgba(65,38,20,.88);
 }
 
 .touch-btn.shield-btn{
-  border-color:rgba(151,233,255,.72);
-  background:rgba(10,49,74,.38);
+  border-color:rgba(151,233,255,.75);
+  background:rgba(12,58,86,.9);
 }
 
 .touch-btn.pressed,
 .touch-btn:active{
   transform:scale(.9);
-  opacity:1;
-  filter:brightness(1.35);
+  filter:brightness(1.3);
   box-shadow:
     0 2px 7px #0008,
-    inset 0 0 20px rgba(255,255,255,.25);
+    inset 0 0 20px rgba(255,255,255,.22);
 }
 
-/* 시작/가로 전환 안내 */
-#orientation-gate{
-  position:fixed;
-  inset:0;
-  z-index:50;
-  display:none;
-  place-items:center;
-  background:
-    radial-gradient(circle at 50% 35%,rgba(32,125,189,.22),transparent 45%),
-    #061426;
-  color:#fff;
-  text-align:center;
-  padding:
-    max(24px,env(safe-area-inset-top))
-    max(24px,env(safe-area-inset-right))
-    max(24px,env(safe-area-inset-bottom))
-    max(24px,env(safe-area-inset-left));
-}
-
-.orientation-card{
-  width:min(88vw,420px);
-  padding:28px 24px 24px;
-  border:1px solid rgba(168,229,255,.25);
-  border-radius:24px;
-  background:rgba(7,25,43,.88);
-  box-shadow:0 20px 70px #0009;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-
-.phone-icon{
-  display:inline-block;
-  font-size:58px;
-  line-height:1;
-  margin-bottom:12px;
-  animation:turnPhone 1.6s ease-in-out infinite;
-  transform-origin:center;
-}
-
-@keyframes turnPhone{
-  0%,25%{transform:rotate(0deg)}
-  70%,100%{transform:rotate(90deg)}
-}
-
-.orientation-card h1{
-  margin:0 0 10px;
-  font-size:24px;
-}
-
-.orientation-card p{
-  margin:0 0 20px;
-  color:#cde6f3;
-  font-size:15px;
-  line-height:1.55;
-}
-
-#start-game{
-  width:100%;
-  min-height:52px;
-  border:0;
-  border-radius:14px;
-  background:linear-gradient(180deg,#38bdf8,#1687c7);
-  color:white;
-  font-size:17px;
-  font-weight:800;
-  box-shadow:0 8px 22px rgba(0,139,210,.3);
-}
-
-#start-game:active{
-  transform:scale(.98);
-}
-
-#rotate-message{
-  display:none;
-  margin-top:15px;
-  color:#ffe58f;
-  font-size:14px;
+.control-label{
+  display:block;
+  margin-top:3px;
+  color:#afcad8;
+  font-size:10px;
   font-weight:700;
+  text-align:center;
+}
+
+.button-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 
 @media (pointer:coarse),(max-width:900px){
-  #mobile-controls{display:block}
-  #orientation-gate{display:grid}
-}
-
-@media (orientation:portrait) and (max-width:900px){
-  #game-wrap{
-    width:100vw;
-    height:auto;
-    max-height:none;
-  }
-
-  #rotate-message{
-    display:block;
+  #mobile-controls{
+    display:flex;
   }
 }
 
-@media (orientation:landscape) and (max-height:500px){
+/* 작은 세로 화면에서도 버튼이 게임을 덮지 않도록 더 작게 */
+@media (max-width:430px){
   body{
-    padding:0;
+    padding-left:6px;
+    padding-right:6px;
+  }
+
+  #app{
+    gap:8px;
   }
 
   #game-wrap{
-    width:100vw;
-    height:100vh;
-    max-width:none;
-    max-height:none;
-    aspect-ratio:auto;
+    border-radius:9px;
   }
 
-  canvas{
-    width:100vw;
-    height:100vh;
-    object-fit:contain;
-  }
-
-  .touch-btn{
-    width:44px;
-    height:44px;
-    font-size:20px;
+  #mobile-controls{
+    min-height:68px;
+    padding:7px 8px max(7px,env(safe-area-inset-bottom));
+    gap:8px;
   }
 
   .control-group{
-    bottom:max(5px,env(safe-area-inset-bottom));
-    gap:5px;
+    gap:7px;
   }
 
-  .control-group.move{
-    left:max(5px,env(safe-area-inset-left));
+  .touch-btn{
+    width:48px;
+    height:48px;
+    flex-basis:48px;
+    font-size:20px;
   }
 
-  .control-group.action{
-    right:max(5px,env(safe-area-inset-right));
+  .control-label{
+    font-size:9px;
+  }
+}
+
+/* PC에서는 기존처럼 화면만 표시 */
+@media (pointer:fine) and (min-width:901px){
+  body{
+    min-height:100vh;
+    align-items:center;
   }
 
-  .orientation-card{
-    padding:20px;
-  }
-
-  .phone-icon{
-    font-size:44px;
+  #app{
+    width:min(100vw,1280px);
   }
 }
 </style>
@@ -278,100 +215,35 @@ canvas{
 <body>
 <div id="loading">에셋 불러오는 중…</div>
 
-<div id="game-wrap">
-  <canvas id="c" width="1280" height="720" aria-label="청렴 에너지 히어로 게임"></canvas>
+<main id="app">
+  <div id="game-wrap">
+    <canvas id="c" width="1280" height="720" aria-label="청렴 에너지 히어로 게임"></canvas>
+  </div>
 
-  <div id="mobile-controls" aria-label="모바일 조작 버튼">
+  <nav id="mobile-controls" aria-label="모바일 조작 버튼">
     <div class="control-group move">
-      <button class="touch-btn" id="btn-left" aria-label="왼쪽 이동">◀</button>
-      <button class="touch-btn" id="btn-right" aria-label="오른쪽 이동">▶</button>
+      <div class="button-wrap">
+        <button class="touch-btn" id="btn-left" aria-label="왼쪽 이동">◀</button>
+        <span class="control-label">왼쪽</span>
+      </div>
+      <div class="button-wrap">
+        <button class="touch-btn" id="btn-right" aria-label="오른쪽 이동">▶</button>
+        <span class="control-label">오른쪽</span>
+      </div>
     </div>
 
     <div class="control-group action">
-      <button class="touch-btn action-btn" id="btn-attack" aria-label="청렴의 검 공격">⚔</button>
-      <button class="touch-btn shield-btn" id="btn-shield" aria-label="이해충돌 방패"></button>
+      <div class="button-wrap">
+        <button class="touch-btn action-btn" id="btn-attack" aria-label="청렴의 검 공격">⚔</button>
+        <span class="control-label">공격</span>
+      </div>
+      <div class="button-wrap">
+        <button class="touch-btn shield-btn" id="btn-shield" aria-label="이해충돌 방패">🛡</button>
+        <span class="control-label">방패</span>
+      </div>
     </div>
-  </div>
-</div>
-
-<div id="orientation-gate" role="dialog" aria-modal="true" aria-label="가로 화면 안내">
-  <div class="orientation-card">
-    <div class="phone-icon" aria-hidden="true">📱</div>
-    <h1>가로 화면으로 플레이해 주세요</h1>
-    <p>
-      게임 시작을 누른 뒤 휴대폰을 옆으로 돌리면<br>
-      더 넓은 화면에서 바로 플레이할 수 있습니다.
-    </p>
-    <button id="start-game" type="button">게임 시작</button>
-    <div id="rotate-message">↻ 휴대폰을 가로로 돌려주세요</div>
-  </div>
-</div>
-
-<script>
-(() => {
-  const gate = document.getElementById('orientation-gate');
-  const startButton = document.getElementById('start-game');
-  let userStarted = false;
-
-  const isMobile = () =>
-    window.matchMedia('(pointer: coarse)').matches ||
-    window.innerWidth <= 900;
-
-  const isLandscape = () =>
-    window.innerWidth > window.innerHeight;
-
-  async function requestFullscreenAndLandscape() {
-    const root = document.documentElement;
-
-    try {
-      if (!document.fullscreenElement && root.requestFullscreen) {
-        await root.requestFullscreen();
-      } else if (!document.webkitFullscreenElement && root.webkitRequestFullscreen) {
-        root.webkitRequestFullscreen();
-      }
-    } catch (error) {
-      console.info('전체화면은 브라우저 정책상 제한될 수 있습니다.');
-    }
-
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        await screen.orientation.lock('landscape');
-      }
-    } catch (error) {
-      console.info('아이폰 Safari에서는 화면 방향 자동 고정이 제한될 수 있습니다.');
-    }
-  }
-
-  function updateGate() {
-    if (!isMobile()) {
-      gate.style.display = 'none';
-      return;
-    }
-
-    if (userStarted && isLandscape()) {
-      gate.style.display = 'none';
-    } else {
-      gate.style.display = 'grid';
-    }
-  }
-
-  startButton.addEventListener('click', async () => {
-    userStarted = true;
-    await requestFullscreenAndLandscape();
-    updateGate();
-  });
-
-  window.addEventListener('resize', updateGate);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(updateGate, 250);
-  });
-
-  document.addEventListener('fullscreenchange', updateGate);
-  document.addEventListener('webkitfullscreenchange', updateGate);
-
-  updateGate();
-})();
-</script>
+  </nav>
+</main>
 
 <script src="game.js"></script>
 </body>
