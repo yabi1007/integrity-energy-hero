@@ -45,10 +45,20 @@ const quizUI={
  continueBtn:document.getElementById('quiz-continue')
 };
 
-function openBriberyQuiz(questionIndex=0){
- if(!quizUI.overlay||typeof BRIBERY_QUESTIONS==='undefined')return;
+function getQuizBank(type){
+ const banks=window.QUIZ_BANKS||{};
+ return Array.isArray(banks[type])?banks[type]:[];
+}
 
- currentQuiz=BRIBERY_QUESTIONS[questionIndex]||getRandomBriberyQuestion();
+function openSlimeQuiz(type){
+ if(!quizUI.overlay)return;
+ const bank=getQuizBank(type);
+ if(!bank.length){
+  console.warn('퀴즈 데이터가 없습니다:',type);
+  return;
+ }
+
+ currentQuiz=bank[Math.floor(Math.random()*bank.length)];
  quizActive=true;
  quizAnswered=false;
 
@@ -74,7 +84,7 @@ function openBriberyQuiz(questionIndex=0){
   button.addEventListener('click',e=>{
    e.preventDefault();
    e.stopPropagation();
-   answerBriberyQuiz(index);
+   answerSlimeQuiz(index);
   });
   quizUI.choices.appendChild(button);
  });
@@ -83,14 +93,12 @@ function openBriberyQuiz(questionIndex=0){
  quizUI.overlay.setAttribute('aria-hidden','false');
 }
 
-function answerBriberyQuiz(selectedIndex){
+function answerSlimeQuiz(selectedIndex){
  if(!quizActive||quizAnswered||!currentQuiz)return;
  quizAnswered=true;
 
  const correct=selectedIndex===currentQuiz.answer;
- quizUI.resultTitle.textContent=correct
-  ? currentQuiz.correctText
-  : currentQuiz.wrongText;
+ quizUI.resultTitle.textContent=correct?currentQuiz.correctText:currentQuiz.wrongText;
  quizUI.resultExplain.textContent=currentQuiz.explain;
  quizUI.result.classList.add('active');
  quizUI.continueBtn.classList.add('active');
@@ -102,7 +110,7 @@ function answerBriberyQuiz(selectedIndex){
  });
 }
 
-function closeBriberyQuiz(){
+function closeSlimeQuiz(){
  if(!quizActive||!quizAnswered)return;
  quizActive=false;
  currentQuiz=null;
@@ -116,12 +124,10 @@ if(quizUI.continueBtn){
  quizUI.continueBtn.addEventListener('click',e=>{
   e.preventDefault();
   e.stopPropagation();
-  closeBriberyQuiz();
+  closeSlimeQuiz();
  });
 }
-if(quizUI.overlay){
- quizUI.overlay.addEventListener('click',e=>e.stopPropagation());
-}
+if(quizUI.overlay)quizUI.overlay.addEventListener('click',e=>e.stopPropagation());
 
 
 const paths={
@@ -173,7 +179,14 @@ function reset(){
  }
  rec=0;en=40;life=3;done=0;cam=0;missiles=[];purifiers=[];bursts=[];hitSparks=[];toxicBits=[];
  pl={x:150,y:G-128,w:62,h:125,vx:0,vy:0,on:1,dir:1,atk:0,atkCd:0,atkSeq:0,sh:0,shCd:0,inv:0};
- foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,label:['특혜','갑질','청탁','사적이익','이해충돌'][i]}));
+ const slimeTypes=[
+  {label:'유혹 슬라임',quizType:'bribery'},
+  {label:'연줄 슬라임',quizType:'connection'},
+  {label:'정보보안 슬라임',quizType:'security'},
+  {label:'공정 슬라임',quizType:'fairness'},
+  {label:'갑질 슬라임',quizType:'abuse'}
+ ];
+ foes=[620,1080,1540,2200,2780].map((x,i)=>({x,y:PLATFORM_SURFACE_Y-72,w:108,h:72,hp:2,dir:i%2?1:-1,alive:1,lastHit:-1,...slimeTypes[i]}));
  boss={x:3650,y:PLATFORM_SURFACE_Y-330,w:390,h:330,hp:24,max:24,active:0,alive:1,lastHit:-1,phase:'wait',intro:0,attackTimer:3.6,countdown:0,flash:0,shotNo:0,charging:0};
 }
 
@@ -428,7 +441,7 @@ function game(dt){
     f.alive=0;
     rec+=12;
     en+=10;
-    openBriberyQuiz(foes.indexOf(f));
+    openSlimeQuiz(f.quizType);
    }}
   if(hit(body,fb)&&pl.inv<=0){
     if(pl.sh>0){f.dir*=-1;f.x+=pl.dir*24}else{life--;pl.inv=1.0;pl.vy=-260;if(life<=0)S='gameover'}
@@ -487,7 +500,7 @@ function game(dt){
 function title(){
  drawCover(A.title,0,0,W,H);
  ctx.fillStyle='rgba(0,20,42,.72)';ctx.fillRect(0,H-42,W,42);
- txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Mobile Demo v5.5',1238,30,15,'#d7efff','right');
+ txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v7.0',1238,30,15,'#d7efff','right');
 }
 function intro(){
  bg(Math.min(30,T*4));ground();
