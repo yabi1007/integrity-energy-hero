@@ -1,5 +1,5 @@
 // v8.2 bundled build: question banks embedded to prevent stale/missing external scripts
-window.GAME_BUILD_VERSION='10.1-no-jump';
+window.GAME_BUILD_VERSION='10.3-effect-upgrade';
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
 // 유혹 슬라임 · 6문항
 
@@ -567,7 +567,7 @@ window.QUIZ_BANKS.abuse = [
  confirmBtn.addEventListener('click',closeNotice,{once:true});
 })();
 
-const GAME_BUILD='10.1';
+const GAME_BUILD='10.3';
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const W=1280,H=720,G=600,WORLD=4100;
 // 플랫폼 이미지의 실제 윗면과 캐릭터 발이 만나는 공통 기준선
@@ -610,6 +610,8 @@ let S='loading',T=0,last=0,cam=0,rec=0,life=3,done=0;
 let pl,foes,boss,missiles=[],bursts=[],hitSparks=[],toxicBits=[];
 
 let quizActive=false,currentQuiz=null,quizAnswered=false;
+// v10.3: 슬라임 처치 연출 동안 게임을 잠시 멈추고 안내 문구를 표시한다.
+let quizPending=false,deathNotice=null;
 
 const quizUI={
  overlay:document.getElementById('quiz-overlay'),
@@ -826,7 +828,7 @@ function scene(s){
 }
 function reset(){
  setResultOverlay(false);
- quizActive=false;currentQuiz=null;quizAnswered=false;
+ quizActive=false;currentQuiz=null;quizAnswered=false;quizPending=false;deathNotice=null;
  if(quizUI.overlay){
   quizUI.overlay.classList.remove('active');
   quizUI.overlay.setAttribute('aria-hidden','true');
@@ -1052,7 +1054,12 @@ function drawCapsule(m){
  txt(t.icon,-9,6,16,'#fff');ctx.restore();
  txt(t.label,m.x+m.w/2,m.y+m.h+19,13,'#ffe8f2');
 }
-function addBurst(x,y,big=false){bursts.push({x,y,t:big?.55:.32,max:big?.55:.32,big});}
+function addBurst(x,y,big=false){
+ // slime 모드는 일반 타격보다 약 1.8배 큰 폭발과 짧은 화이트 플래시를 사용한다.
+ const slime=big==='slime';
+ const duration=big===true?.55:slime?.58:.32;
+ bursts.push({x,y,t:duration,max:duration,big:big===true,slime});
+}
 function addHitSpark(x,y,big=false){
  const count=big?10:6;
  for(let i=0;i<count;i++){
@@ -1078,6 +1085,13 @@ function update(dt){
 }
 function game(dt){
  if(quizActive)return;
+ // 처치 안내 중에는 적과 플레이어의 진행을 멈추되 폭발 효과는 계속 재생한다.
+ if(quizPending){
+  bursts.forEach(b=>b.t-=dt);bursts=bursts.filter(b=>b.t>0);
+  hitSparks.forEach(s=>{s.t-=dt;s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=760*dt});hitSparks=hitSparks.filter(s=>s.t>0);
+  toxicBits.forEach(q=>{q.t-=dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=620*dt;q.vx*=.985});toxicBits=toxicBits.filter(q=>q.t>0);
+  return;
+ }
  let d=(K['arrowleft']||K['a']?-1:0)+(K['arrowright']||K['d']?1:0);
  const guarding=pl.sh>0;
  const speed=guarding?130:(pl.atk>0?180:270);
@@ -1099,10 +1113,16 @@ function game(dt){
   const fb={x:f.x-f.w/2,y:f.y,w:f.w,h:f.h};
   if(pl.atk>.05&&hit(atkBox,fb)&&f.lastHit!==pl.atkSeq){f.lastHit=pl.atkSeq;f.hp--;addHitSpark(pl.dir>0?f.x-f.w*.22:f.x+f.w*.22,f.y+f.h*.48,false);if(f.hp<=0){
     f.alive=0;
-    addBurst(f.x,f.y+20,false);
+    addBurst(f.x,f.y+20,'slime');
     const quizType=f.quizType;
     const quizLabel=f.label;
-    setTimeout(()=>{openSlimeQuiz(quizType,quizLabel);},900);
+    quizPending=true;
+    deathNotice={label:quizLabel};
+    setTimeout(()=>{
+     deathNotice=null;
+     quizPending=false;
+     openSlimeQuiz(quizType,quizLabel);
+    },1250);
    }}
   if(hit(body,fb)&&pl.inv<=0){
     if(pl.sh>0){f.dir*=-1;f.x+=pl.dir*24}else{life--;pl.inv=1.0;pl.vy=-260;if(life<=0)S='gameover'}
@@ -1228,8 +1248,31 @@ function drawGame(){
  });
  toxicBits.forEach(q=>{const a=Math.max(0,q.t/q.max);ctx.globalAlpha=a;if(q.kind==='glass'){ctx.strokeStyle='#e8f7ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(q.x-4,q.y-2);ctx.lineTo(q.x+4,q.y+2);ctx.stroke()}else{ctx.fillStyle=q.color;ctx.beginPath();ctx.arc(q.x,q.y,q.r*(.5+a),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1});
  bursts.forEach(b=>{
-  const p=1-b.t/b.max,r=(b.big?115:58)*p;
-  ctx.globalAlpha=1-p;ctx.strokeStyle=b.big?'#9ffcff':'#ffe671';ctx.lineWidth=b.big?12:7;ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+  const p=1-b.t/b.max;
+  const maxRadius=b.big?115:b.slime?105:58;
+  const r=maxRadius*p;
+
+  // 폭발 초반에만 중심부가 짧고 부드럽게 하얗게 번쩍인다.
+  if(b.slime&&p<.22){
+   const flashAlpha=(1-p/.22)*.78;
+   const flashRadius=28+68*(p/.22);
+   const grad=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,flashRadius);
+   grad.addColorStop(0,`rgba(255,255,255,${flashAlpha})`);
+   grad.addColorStop(.45,`rgba(255,246,186,${flashAlpha*.62})`);
+   grad.addColorStop(1,'rgba(255,255,255,0)');
+   ctx.fillStyle=grad;ctx.beginPath();ctx.arc(b.x,b.y,flashRadius,0,Math.PI*2);ctx.fill();
+  }
+
+  ctx.globalAlpha=1-p;
+  ctx.strokeStyle=b.big?'#9ffcff':b.slime?'#fff29a':'#ffe671';
+  ctx.lineWidth=b.big?12:b.slime?11:7;
+  ctx.beginPath();ctx.arc(b.x,b.y,r,0,Math.PI*2);ctx.stroke();
+  if(b.slime){
+   ctx.globalAlpha=(1-p)*.65;
+   ctx.strokeStyle='#ffffff';ctx.lineWidth=4;
+   ctx.beginPath();ctx.arc(b.x,b.y,r*.72,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
  });
  hitSparks.forEach(s=>{
   const a=Math.max(0,s.t/s.max);
@@ -1252,6 +1295,15 @@ function drawGame(){
  ctx.fillStyle=rec<25?'#ff596d':rec<50?'#ff9f43':rec<75?'#ffd84d':'#50dba2';
  ctx.fillRect(364,62,532*rec/100,16);
  txt(IS_TOUCH?'◀ ▶ 이동 · ⚔ 공격 · 🛡 방패':'← → 이동 · 공격 Z · 방패 X',1035,40,15,'#d9f7ff');
+
+ // v10.3: 슬라임 처치와 퀴즈의 연결 이유를 화면 중앙에 안내한다.
+ if(deathNotice){
+  ctx.fillStyle='rgba(2,12,25,.58)';ctx.fillRect(0,0,W,H);
+  rr(W/2-390,H/2-115,780,230,30,'rgba(5,25,45,.95)','#ffe477');
+  txt('✨  '+deathNotice.label+' 처치!',W/2,H/2-45,40,'#ffe477');
+  txt('슬라임이 남긴 부패 상황을',W/2,H/2+20,27,'#ffffff');
+  txt('올바르게 판단하세요!',W/2,H/2+62,31,'#8fe8ff');
+ }
 
  if(boss.active&&boss.alive){
   rr(370,105,540,54,18,'rgba(35,5,28,.9)','#ff87ac');
