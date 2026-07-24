@@ -1,11 +1,11 @@
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
-// 정보보안 슬라임 · 6문항
+// 비밀 슬라임 · 6문항
 
 window.QUIZ_BANKS = window.QUIZ_BANKS || {};
 window.QUIZ_BANKS.security = [
 {
   "id": 1,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "개발 예정지 정보",
   "question": "공직자가 비공개 개발계획을 업무 중 알게 됐습니다. 가족에게 주변 토지를 미리 사라고 알려주는 것은?",
@@ -21,7 +21,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 2,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "업무자료를 활용한 투자",
   "question": "지원 대상 기업 명단을 미리 알게 된 공직자가 해당 기업 주식을 매수하려 합니다. 가장 적절한 판단은?",
@@ -37,7 +37,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 3,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "친구에게만 귀띔",
   "question": "아직 공개되지 않은 공모사업 정보를 친구에게 알려 미리 준비하게 하는 행동은?",
@@ -53,7 +53,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 4,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "퇴직 후 자료 활용",
   "question": "퇴직한 공직자가 재직 중 알게 된 비공개 사업계획을 새 직장에서 영업에 활용하려 합니다. 가장 적절한 판단은?",
@@ -69,7 +69,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 5,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "회의자료 전달",
   "question": "공직자가 내부 검토 단계의 정책자료를 외부 전문가에게 의견을 받기 위해 보내려 합니다. 어떻게 해야 할까요?",
@@ -85,7 +85,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 6,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "부동산 신고 대상",
   "question": "부동산 개발 업무를 담당하는 공직자가 해당 사업지 인근 토지를 보유하고 있음을 알게 됐습니다. 가장 적절한 행동은?",
