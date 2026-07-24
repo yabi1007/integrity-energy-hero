@@ -1176,7 +1176,7 @@ function game(dt){
 function title(){
  drawCover(A.title,0,0,W,H);
  ctx.fillStyle='rgba(0,20,42,.72)';ctx.fillRect(0,H-42,W,42);
- txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);txt('Full Quiz v8.6',1238,30,15,'#d7efff','right');
+ txt(IS_TOUCH?'화면을 터치하거나 ⚔ 버튼을 눌러 시작':'게임 시작 버튼 클릭 · ENTER 또는 SPACE',W/2,H-16,17);
 }
 function intro(){
  bg(Math.min(30,T*4));ground();
