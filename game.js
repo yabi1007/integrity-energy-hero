@@ -1099,7 +1099,10 @@ function game(dt){
   const fb={x:f.x-f.w/2,y:f.y,w:f.w,h:f.h};
   if(pl.atk>.05&&hit(atkBox,fb)&&f.lastHit!==pl.atkSeq){f.lastHit=pl.atkSeq;f.hp--;addHitSpark(pl.dir>0?f.x-f.w*.22:f.x+f.w*.22,f.y+f.h*.48,false);if(f.hp<=0){
     f.alive=0;
-    openSlimeQuiz(f.quizType,f.label);
+    addBurst(f.x,f.y+20,false);
+    const quizType=f.quizType;
+    const quizLabel=f.label;
+    setTimeout(()=>{openSlimeQuiz(quizType,quizLabel);},900);
    }}
   if(hit(body,fb)&&pl.inv<=0){
     if(pl.sh>0){f.dir*=-1;f.x+=pl.dir*24}else{life--;pl.inv=1.0;pl.vy=-260;if(life<=0)S='gameover'}
