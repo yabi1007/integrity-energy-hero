@@ -209,13 +209,13 @@ window.QUIZ_BANKS.connection = [
 
 
 // 이해충돌방지법 10가지 행동기준 기반 상황형 문제은행
-// 정보보안 슬라임 · 6문항
+// 비밀 슬라임 · 6문항
 
 window.QUIZ_BANKS = window.QUIZ_BANKS || {};
 window.QUIZ_BANKS.security = [
 {
   "id": 1,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "공고 전 투자",
   "question": "공직자가 아직 공개되지 않은 개발계획을 알고 인근 토지를 가족 명의로 매수하려 합니다. 가장 적절한 판단은?",
@@ -231,7 +231,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 2,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "퇴직 후 정보 활용",
   "question": "공직자가 퇴직한 지 1년 뒤 재직 중 알게 된 미공개 사업정보로 투자했습니다. 가장 적절한 설명은?",
@@ -247,7 +247,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 3,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "친구에게 힌트",
   "question": "입찰 공고 전 공직자가 친구 업체에 “이번에는 가격보다 기술 점수가 중요할 것”이라고 귀띔했습니다. 친구가 실제 이익을 얻지 못했다면?",
@@ -263,7 +263,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 4,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "공개자료 재활용",
   "question": "기관 홈페이지에 이미 공개된 통계를 활용해 개인 연구논문을 작성했습니다. 가장 적절한 판단은?",
@@ -279,7 +279,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 5,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "제3자의 책임",
   "question": "업체 대표가 공직자로부터 받은 자료가 미공개 내부정보임을 알면서 투자에 이용했습니다. 가장 적절한 설명은?",
@@ -295,7 +295,7 @@ window.QUIZ_BANKS.security = [
 },
 {
   "id": 6,
-  "slimeName": "정보보안 슬라임",
+  "slimeName": "비밀 슬라임",
   "slimeQuote": "한 번 더 생각해 봐!",
   "title": "내부정보와 가족",
   "question": "공직자가 미공개 정책 변경 사실을 배우자에게 말했고, 배우자가 관련 주식을 매수했습니다. 공직자가 직접 매수하지 않았다면?",
@@ -839,7 +839,7 @@ function reset(){
  const slimeTypes=[
   {id:'temptation',label:'유혹 슬라임',quizType:'bribery'},
   {id:'connection',label:'연줄 슬라임',quizType:'connection'},
-  {id:'security',label:'정보보안 슬라임',quizType:'security'},
+  {id:'security',label:'비밀 슬라임',quizType:'security'},
   {id:'fairness',label:'공정 슬라임',quizType:'fairness'},
   {id:'abuse',label:'갑질 슬라임',quizType:'abuse'}
  ];
